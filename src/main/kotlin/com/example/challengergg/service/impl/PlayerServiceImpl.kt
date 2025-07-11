@@ -63,7 +63,7 @@ class PlayerServiceImpl(
         player.profileIconId = riotSummonerDto.profileIconId;
         player.summonerLevel = riotSummonerDto.summonerLevel;
 
-        /* if player existed -> assign unchangeable from the old object to the new one
+        /* if player existed -> assign unchangeable fields from the old object to the new one
         * if new -> create 2 rank objects (solo and flex) */
         val existedPlayer = playerRepository.findByPuuid(player.puuid);
         if(existedPlayer != null) {

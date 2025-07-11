@@ -82,7 +82,7 @@ class RiotApi {
     }
 
     fun getSoloDuoLeague(tier: RankTier): RiotLeagueListDto? {
-        if(tier.weight < 7) return null;
+        if(tier.weight < RankTier.MASTER.weight) return null;
         val reqTierString = when (tier) {
             RankTier.MASTER -> "masterleagues";
             RankTier.GRANDMASTER -> "grandmasterleagues";
