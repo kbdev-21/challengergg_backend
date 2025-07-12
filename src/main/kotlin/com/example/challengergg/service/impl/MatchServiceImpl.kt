@@ -135,12 +135,8 @@ class MatchServiceImpl(
             performance.kills = dto.kills;
             performance.deaths = dto.deaths;
             performance.assists = dto.assists;
-            performance.kda = BigDecimal(dto.challenges.kda.toDouble())
-                .setScale(4, RoundingMode.HALF_UP)
-                .toFloat();
-            performance.killParticipation = BigDecimal(dto.challenges.killParticipation.toDouble())
-                .setScale(4, RoundingMode.HALF_UP)
-                .toFloat();
+            performance.kda = dto.challenges.kda.toDouble();
+            performance.killParticipation = dto.challenges.killParticipation.toDouble();
             val minutes = (match.duration/60).toInt();
             performance.totalCs = dto.totalMinionsKilled + dto.neutralMinionsKilled;
             performance.csPerMin = performance.totalCs.toDouble() / minutes;
@@ -192,7 +188,7 @@ class MatchServiceImpl(
                 dto.perks.styles[1].selections[0].perk,
                 dto.perks.styles[1].selections[1].perk
             );
-            performance.rune.code = performance.rune.main.toString() + "-" + performance.rune.subStyle.toString();
+            performance.rune.code = performance.rune.main.toString() + "-" + performance.rune.mainStyle.toString() + "-" + performance.rune.subStyle.toString();
 
             performances.add(performance);
         }

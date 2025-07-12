@@ -15,9 +15,7 @@ class ScheduleTask(
     private val riotApi: RiotApi,
     private val matchService: MatchService
 ) {
-    //PRINT
-
-    @Scheduled(cron = "30 */5 * * * *")
+    @Scheduled(cron = "0 */10 * * * *")
     fun testSchedule() {
         println("SCHEDULE: Start updating champion stats");
         val start = System.currentTimeMillis();

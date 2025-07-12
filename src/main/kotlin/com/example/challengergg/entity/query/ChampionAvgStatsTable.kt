@@ -4,7 +4,7 @@ interface ChampionAvgStatsTable {
     fun getAvgKills(): Double
     fun getAvgDeaths(): Double
     fun getAvgAssists(): Double
-    fun getAvpKda(): Double
+    fun getAvgKda(): Double
     fun getAvgKp(): Double
     fun getAvgGpm(): Double
     fun getAvgCspm(): Double

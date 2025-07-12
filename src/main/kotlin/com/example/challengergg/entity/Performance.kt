@@ -56,9 +56,9 @@ class Performance() {
 
     var assists: Int = 0;
 
-    var kda: Float = 0F;
+    var kda: Double = 0.0;
 
-    var killParticipation: Float = 0F;
+    var killParticipation: Double = 0.0;
 
     var totalCs: Int = 0;
 

@@ -57,6 +57,21 @@ interface PerformanceRepository: JpaRepository<Performance, UUID> {
 
     @Query(
         """
+            SELECT r.main as value, COUNT(*) AS count, COUNT(CASE WHEN p.win = true THEN 1 END) AS wins
+            FROM public.performances p
+            JOIN public.runes r ON r.rune_id = p.rune_id
+            JOIN public.matches m ON p.match_id = m.match_id
+            WHERE m.queue IN ('SOLO', 'FLEX')
+            AND p.champ_pos_code = :champPosCode
+            GROUP BY r.main
+            ORDER BY count DESC
+        """,
+        nativeQuery = true
+    )
+    fun countAllRankedRuneMainByChampPosCode(champPosCode: String): List<CountAndWinsTable<Int>>;
+
+    @Query(
+        """
             SELECT r.selections as value, COUNT(*) AS count, COUNT(CASE WHEN p.win = true THEN 1 END) AS wins
             FROM public.performances p
             JOIN public.runes r ON r.rune_id = p.rune_id
@@ -69,7 +84,7 @@ interface PerformanceRepository: JpaRepository<Performance, UUID> {
         """,
         nativeQuery = true
     )
-    fun countAllRankedRuneSelectionsByChampPosCodeAndRuneCode(champPosCode: String, runeCode: String): List<CountAndWinsTable<List<Int>>>;
+    fun countAllRankedRuneSelectionsByChampPosCodeAndRuneCode(champPosCode: String, runeCode: String): List<CountAndWinsTable<Array<Int>>>;
 
     @Query(
         """
@@ -85,7 +100,7 @@ interface PerformanceRepository: JpaRepository<Performance, UUID> {
         """,
         nativeQuery = true
     )
-    fun countAllRankedItemIdsByChampPosCode(champPosCode: String, type: String): List<CountAndWinsTable<String>>;
+    fun countAllRankedItemIdsByChampPosCode(champPosCode: String, type: String): List<CountAndWinsTable<Int>>;
 
     @Query(
         """
@@ -94,6 +109,7 @@ interface PerformanceRepository: JpaRepository<Performance, UUID> {
             JOIN public.matches m ON p.match_id = m.match_id
             WHERE m.queue IN ('SOLO', 'FLEX')
             AND p.champ_pos_code = :champPosCode
+            AND p.lane_opponent_champion_name != '[null]'
             GROUP BY p.lane_opponent_champion_name
             ORDER BY count DESC
         """,
@@ -106,7 +122,7 @@ interface PerformanceRepository: JpaRepository<Performance, UUID> {
             SELECT AVG(p.kills) AS avg_kills,
             AVG(p.deaths) AS avg_deaths,
             AVG(p.assists) AS avg_assists,
-            AVG(p.kda) AS avp_kda,
+            AVG(p.kda) AS avg_kda,
             AVG(p.kill_participation) AS avg_kp,
             AVG(p.gold_per_min) AS avg_gpm,
             AVG(p.cs_per_min) AS avg_cspm,

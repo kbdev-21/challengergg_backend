@@ -15,7 +15,7 @@ class Rune {
     @OneToOne(mappedBy = "rune")
     var performance: Performance? = null;
 
-    /* use to identify a rune set choice: {main}-{subStyle} */
+    /* use to identify a rune set choice: {main}-{mainStyle}-{subStyle} */
     var code: String = "";
 
     var main: Int = 0;
