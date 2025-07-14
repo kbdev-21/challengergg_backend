@@ -52,6 +52,8 @@ class ChampionStat {
 
     var avgPenta: Double = 0.0;
 
+    var avgSolokills: Double = 0.0;
+
     var avgKbscore: Double = 0.0;
 
     @JdbcTypeCode(SqlTypes.JSON)

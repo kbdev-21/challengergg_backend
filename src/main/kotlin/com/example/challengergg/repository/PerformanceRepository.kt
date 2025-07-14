@@ -129,6 +129,7 @@ interface PerformanceRepository: JpaRepository<Performance, UUID> {
             AVG(p.damage_per_min) AS avg_dpm,
             AVG(p.turret_damage_per_min) AS avg_tdpm,
             AVG(p.penta_kills) AS avg_penta,
+            AVG(p.solo_kills) AS avg_solokills,
             AVG(p.kb_score) AS avg_kbscore
             FROM public.performances p
             JOIN public.matches m ON p.match_id = m.match_id

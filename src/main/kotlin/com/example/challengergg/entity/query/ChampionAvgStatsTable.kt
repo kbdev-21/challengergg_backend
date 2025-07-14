@@ -11,5 +11,6 @@ interface ChampionAvgStatsTable {
     fun getAvgDpm(): Double
     fun getAvgTdpm(): Double
     fun getAvgPenta(): Double
+    fun getAvgSolokills(): Double
     fun getAvgKbscore(): Double
 }
