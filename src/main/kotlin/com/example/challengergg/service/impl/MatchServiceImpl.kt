@@ -7,6 +7,7 @@ import com.example.challengergg.common.enums.TeamCode
 import com.example.challengergg.common.util.Algorithm
 import com.example.challengergg.common.util.StringUtil
 import com.example.challengergg.dto.MatchDto
+import com.example.challengergg.dto.PerformanceDto
 import com.example.challengergg.entity.PerformanceItem
 import com.example.challengergg.entity.Match
 import com.example.challengergg.entity.Performance
@@ -14,29 +15,37 @@ import com.example.challengergg.exception.CustomException
 import com.example.challengergg.external.RiotApi
 import com.example.challengergg.external.dto.ParticipantDto
 import com.example.challengergg.external.dto.RiotMatchDto
+import com.example.challengergg.mapper.MatchMapper
 import com.example.challengergg.repository.MatchRepository
 import com.example.challengergg.service.MatchService
+import jakarta.transaction.Transactional
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Service
+@Transactional
 class MatchServiceImpl(
     private val matchRepository: MatchRepository,
     private val riotApi: RiotApi,
 ): MatchService {
     private val algorithm = Algorithm();
     private val stringUtil = StringUtil();
-    private val modelMapper = ModelMapper();
+    private val matchMapper = MatchMapper();
 
     override fun getMatchesByPuuid(puuid: String): List<MatchDto> {
         val playerMatches = getMatchesAndSaveNewOnesByPuuid(puuid);
 
         return playerMatches
             .sortedByDescending { it.startTimeStamp }
-            .map { match -> modelMapper.map(match, MatchDto::class.java) };
+            .map { match -> matchMapper.toMatchDto(match) };
+    }
+
+    override fun getMatchesByGameNameAndTagLine(gameName: String, tagLine: String): List<MatchDto> {
+        val puuid = riotApi.getAccountByNameAndTag(gameName, tagLine)?.puuid
+            ?: throw CustomException(HttpStatus.NOT_FOUND, "Account not found");
+
+        return getMatchesByPuuid(puuid);
     }
 
     fun getMatchesAndSaveNewOnesByPuuid(puuid: String): List<Match> {
@@ -151,12 +160,12 @@ class MatchServiceImpl(
             performance.totalTurretDamageDealt = dto.damageDealtToBuildings;
             performance.turretDamagePerMin = performance.totalTurretDamageDealt / minutes;
             val riotDtoItems = listOf(dto.item0, dto.item1, dto.item2, dto.item3, dto.item4, dto.item5, dto.item6);
-            performance.performanceItems = MutableList(riotDtoItems.size) {PerformanceItem()};
+            performance.items = MutableList(riotDtoItems.size) {PerformanceItem()};
             for ((i, item) in riotDtoItems.withIndex()) {
-                performance.performanceItems[i].performance = performance;
-                performance.performanceItems[i].itemId = item;
-                performance.performanceItems[i].slot = i;
-                performance.performanceItems[i].type = when (item) {
+                performance.items[i].performance = performance;
+                performance.items[i].itemId = item;
+                performance.items[i].slot = i;
+                performance.items[i].type = when (item) {
                     0 -> ItemType.EMPTY;
                     in ItemType.START.riotIdsList -> ItemType.START;
                     in ItemType.BASE.riotIdsList -> ItemType.BASE;
@@ -194,18 +203,21 @@ class MatchServiceImpl(
         }
 
         /* calculate opponent, KB score and MVP */
-        var highestKbScore = 0;
-
         for(performance in performances) {
             performance.laneOpponentChampionName = algorithm.findLaneOpponent(performance, performances)?.championName;
             val kbScore = algorithm.calculateKbScore(performance, performances, match.duration);
-            if(kbScore > highestKbScore) highestKbScore = kbScore;
             performance.kbScore = kbScore;
         }
         performances
-            .filter { it.kbScore == highestKbScore }
-            .sortedBy { it.deaths }
-            .first().mvp = true;
+            .sortedByDescending { it.kbScore }
+            .forEachIndexed { index, performance ->
+                performance.kbScorePlacement = index + 1;
+                if(index == 0) performance.mvp = true;
+            }
+        performances
+            .filter { !it.win }
+            .maxByOrNull { it.kbScore }
+            ?.let { it.svp = true }
 
         return performances;
     }

@@ -5,6 +5,7 @@ import com.example.challengergg.exception.CustomException
 import com.example.challengergg.external.RiotApi
 import com.example.challengergg.service.AnalyticService
 import com.example.challengergg.service.MatchService
+import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -15,7 +16,7 @@ class ScheduleTask(
     private val riotApi: RiotApi,
     private val matchService: MatchService
 ) {
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "30 */10 * * * *")
     fun testSchedule() {
         println("SCHEDULE: Start updating champion stats");
         val start = System.currentTimeMillis();
@@ -27,7 +28,8 @@ class ScheduleTask(
         println("SCHEDULE: Finished update champion stats in ${elapsedSeconds}s");
     }
 
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 */2 * * * *")
+    @Transactional
     fun fetchMatches() {
         println("SCHEDULE: Start fetching matches");
         val start = System.currentTimeMillis();

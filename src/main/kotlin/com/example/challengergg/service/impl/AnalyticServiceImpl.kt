@@ -4,12 +4,16 @@ import com.example.challengergg.common.enums.ItemType
 import com.example.challengergg.common.enums.PlayerPosition
 import com.example.challengergg.common.util.Algorithm
 import com.example.challengergg.common.util.StringUtil
+import com.example.challengergg.dto.ChampionStatDetailDto
+import com.example.challengergg.dto.ChampionStatSummaryDto
 import com.example.challengergg.entity.analytic.*
+import com.example.challengergg.exception.CustomException
 import com.example.challengergg.repository.ChampionStatRepository
 import com.example.challengergg.repository.MatchRepository
 import com.example.challengergg.repository.PerformanceRepository
 import com.example.challengergg.service.AnalyticService
 import org.modelmapper.ModelMapper
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -21,6 +25,25 @@ class AnalyticServiceImpl(
     private val algorithm = Algorithm();
     private val modelMapper = ModelMapper();
     private val stringUtil = StringUtil();
+
+    override fun getAllChampionStats(): List<ChampionStatSummaryDto> {
+        return championStatRepository
+            .findAll()
+            .sortedByDescending { it.power }
+            .map { stat ->
+                modelMapper.map(stat, ChampionStatSummaryDto::class.java);
+            }
+    }
+
+    override fun getChampionStatsByChampionName(championName: String): List<ChampionStatDetailDto> {
+        val championStats = championStatRepository.findByChampionName(championName)
+            ?: throw throw CustomException(HttpStatus.NOT_FOUND, "Champion not found");
+        return championStats
+            .sortedByDescending { it.pickRate }
+            .map { stat ->
+                modelMapper.map(stat, ChampionStatDetailDto::class.java);
+            }
+    }
 
     override fun updateChampionStats() {
         val totalMatches = matchRepository.countRankedMatches();
@@ -153,4 +176,6 @@ class AnalyticServiceImpl(
         }
         championStatRepository.saveAll(newChampionStats);
     }
+
+
 }

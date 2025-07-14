@@ -77,7 +77,7 @@ class Performance() {
     var totalTurretDamageDealt: Int = 0;
 
     @OneToMany(mappedBy = "performance", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var performanceItems: MutableList<PerformanceItem> = mutableListOf();
+    var items: MutableList<PerformanceItem> = mutableListOf();
 
     var soloKills: Int = 0;
 
@@ -99,7 +99,11 @@ class Performance() {
 
     var kbScore: Int = 0;
 
+    var kbScorePlacement: Int = 0;
+
     var mvp: Boolean = false;
+
+    var svp: Boolean = false;
 
     var laneOpponentChampionName: String? = null;
 
