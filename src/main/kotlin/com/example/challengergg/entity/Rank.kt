@@ -29,6 +29,8 @@ class Rank() {
 
     var losses: Int = 0;
 
+    var winRate: Double = 0.0;
+
     @ManyToOne
     @JoinColumn(name = "player_id", nullable = false)
     var player: Player = Player();

@@ -37,7 +37,7 @@ class AnalyticServiceImpl(
 
     override fun getChampionStatsByChampionName(championName: String): List<ChampionStatDetailDto> {
         val championStats = championStatRepository.findByChampionName(championName)
-            ?: throw throw CustomException(HttpStatus.NOT_FOUND, "Champion not found");
+            ?: throw CustomException(HttpStatus.NOT_FOUND, "Champion not found");
         return championStats
             .sortedByDescending { it.pickRate }
             .map { stat ->

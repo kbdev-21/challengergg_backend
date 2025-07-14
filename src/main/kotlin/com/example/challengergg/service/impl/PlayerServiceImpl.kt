@@ -91,6 +91,7 @@ class PlayerServiceImpl(
                 rank.points = soloDto.leaguePoints;
                 rank.wins = soloDto.wins;
                 rank.losses = soloDto.losses;
+                rank.winRate = rank.wins.toDouble() / (rank.wins + rank.losses).toDouble();
                 rank.power = algorithm.calculateRankPower(rank.tier, rank.division, rank.points);
             }
             if(rank.queue == QueueType.FLEX && flexDto != null) {
@@ -99,6 +100,7 @@ class PlayerServiceImpl(
                 rank.points = flexDto.leaguePoints;
                 rank.wins = flexDto.wins;
                 rank.losses = flexDto.losses;
+                rank.winRate = rank.wins.toDouble() / (rank.wins + rank.losses).toDouble();
                 rank.power = algorithm.calculateRankPower(rank.tier, rank.division, rank.points);
             }
         }

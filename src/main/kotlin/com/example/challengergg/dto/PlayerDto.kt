@@ -24,5 +24,6 @@ class RankDto {
     var points: Int = 0;
     var wins: Int = 0;
     var losses: Int = 0;
+    var winRate: Double = 0.0;
     var power: Int = 0;
 }
