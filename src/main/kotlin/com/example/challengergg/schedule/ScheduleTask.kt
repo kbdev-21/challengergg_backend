@@ -30,7 +30,7 @@ class ScheduleTask(
 
     @Scheduled(cron = "0 */2 * * * *")
     @Transactional
-    fun fetchMatches() {
+    suspend fun fetchMatches() {
         println("SCHEDULE: Start fetching matches");
         val start = System.currentTimeMillis();
 

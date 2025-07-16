@@ -69,7 +69,7 @@ class RiotApi {
             .block();
     }
 
-     fun getMatchByMatchId(matchId: String): RiotMatchDto? {
+     suspend fun getMatchByMatchId(matchId: String): RiotMatchDto? {
         val url = "https://sea.api.riotgames.com/lol/match/v5/matches/$matchId?api_key=$apiKey";
         return webClient.get()
             .uri(url)
@@ -78,7 +78,7 @@ class RiotApi {
                 Mono.error(CustomException(HttpStatus.NOT_FOUND, "Not found"));
             }
             .bodyToMono(RiotMatchDto::class.java)
-            .block();
+            .awaitSingleOrNull();
     }
 
     fun getSoloDuoLeague(tier: RankTier): RiotLeagueListDto? {

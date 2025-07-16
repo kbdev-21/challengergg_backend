@@ -24,7 +24,7 @@ class Match {
 
     var startTimeStamp: Long = 0;
 
-    @OneToMany(mappedBy = "match", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "match", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     var performances: MutableList<Performance> = mutableListOf()
 
 }

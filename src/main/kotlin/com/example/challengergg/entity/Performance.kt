@@ -46,7 +46,7 @@ class Performance() {
     /* {spell1Id}-{spell2Id} (sort asc) */
     var spellComboCode: String = "";
 
-    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "rune_id")
     var rune: Rune = Rune();
 
@@ -76,7 +76,7 @@ class Performance() {
 
     var totalTurretDamageDealt: Int = 0;
 
-    @OneToMany(mappedBy = "performance", cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "performance", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     var items: MutableList<PerformanceItem> = mutableListOf();
 
     var soloKills: Int = 0;

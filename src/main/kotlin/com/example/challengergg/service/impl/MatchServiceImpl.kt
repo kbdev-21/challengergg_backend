@@ -7,7 +7,6 @@ import com.example.challengergg.common.enums.TeamCode
 import com.example.challengergg.common.util.Algorithm
 import com.example.challengergg.common.util.StringUtil
 import com.example.challengergg.dto.MatchDto
-import com.example.challengergg.dto.PerformanceDto
 import com.example.challengergg.entity.PerformanceItem
 import com.example.challengergg.entity.Match
 import com.example.challengergg.entity.Performance
@@ -19,7 +18,9 @@ import com.example.challengergg.mapper.MatchMapper
 import com.example.challengergg.repository.MatchRepository
 import com.example.challengergg.service.MatchService
 import jakarta.transaction.Transactional
-import org.modelmapper.ModelMapper
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
@@ -33,7 +34,7 @@ class MatchServiceImpl(
     private val stringUtil = StringUtil();
     private val matchMapper = MatchMapper();
 
-    override fun getMatchesByPuuid(puuid: String): List<MatchDto> {
+    override suspend fun getMatchesByPuuid(puuid: String): List<MatchDto> {
         val playerMatches = getMatchesAndSaveNewOnesByPuuid(puuid);
 
         return playerMatches
@@ -41,14 +42,14 @@ class MatchServiceImpl(
             .map { match -> matchMapper.toMatchDto(match) };
     }
 
-    override fun getMatchesByGameNameAndTagLine(gameName: String, tagLine: String): List<MatchDto> {
+    override suspend fun getMatchesByGameNameAndTagLine(gameName: String, tagLine: String): List<MatchDto> {
         val puuid = riotApi.getAccountByNameAndTag(gameName, tagLine)?.puuid
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Account not found");
 
         return getMatchesByPuuid(puuid);
     }
 
-    fun getMatchesAndSaveNewOnesByPuuid(puuid: String): List<Match> {
+    private suspend fun getMatchesAndSaveNewOnesByPuuid(puuid: String): List<Match> {
         val matchIds = riotApi.getMatchIdsByPuuid(puuid, null, 0, 20)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Puuid not found");
         val existedMatches = getExistedMatchesByMatchIds(matchIds);
@@ -74,20 +75,26 @@ class MatchServiceImpl(
         return existedMatches;
     }
 
-    private fun getRiotMatchDtosByMatchIdsUnlessItExisted(
+    private suspend fun getRiotMatchDtosByMatchIdsUnlessItExisted(
         matchIds: List<String>,
         existedMatches: List<Match>
     ): List<RiotMatchDto> {
         val existedMatchIds = existedMatches.map { it.matchId };
+        val newMatchDtos = coroutineScope {
+            matchIds
+                .filterNot { it in existedMatchIds }
+                .chunked(5)
+                .flatMap { chunk ->
+                    chunk.map { matchId ->
+                        async {
+                            riotApi.getMatchByMatchId(matchId)
+                                ?: throw CustomException(HttpStatus.NOT_FOUND, "Match not found: $matchId");
+                        }
+                    }.awaitAll();
+                }
 
-        val riotMatchDtos = matchIds
-            .filterNot { it in existedMatchIds }
-            .map { matchId ->
-                riotApi.getMatchByMatchId(matchId)
-                    ?: throw CustomException(HttpStatus.NOT_FOUND, "Match not found")
-            }
-
-        return riotMatchDtos;
+        }
+        return newMatchDtos;
     }
 
     private fun getMatchByRiotMatchDto(riotMatchDto: RiotMatchDto): Match {

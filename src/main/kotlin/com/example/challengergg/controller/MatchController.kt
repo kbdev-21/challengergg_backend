@@ -11,12 +11,12 @@ class MatchController(
     private val matchService: MatchService
 ) {
     @GetMapping("/api/v1/matches/by-puuid/{puuid}")
-    fun getMatchesByPuuid(@PathVariable puuid: String): List<MatchDto> {
+    suspend fun getMatchesByPuuid(@PathVariable puuid: String): List<MatchDto> {
         return matchService.getMatchesByPuuid(puuid);
     }
 
     @GetMapping("/api/v1/matches/by-riotid/{gameName}/{tagLine}")
-    fun getMatchesByRiotId(@PathVariable gameName: String, @PathVariable tagLine: String): List<MatchDto> {
+    suspend fun getMatchesByRiotId(@PathVariable gameName: String, @PathVariable tagLine: String): List<MatchDto> {
         return matchService.getMatchesByGameNameAndTagLine(gameName, tagLine);
     }
 
