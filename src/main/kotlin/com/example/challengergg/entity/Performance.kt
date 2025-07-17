@@ -3,6 +3,7 @@ package com.example.challengergg.entity
 import com.example.challengergg.common.enums.PlayerPosition
 import com.example.challengergg.common.enums.TeamCode
 import jakarta.persistence.*
+import org.hibernate.annotations.BatchSize
 import java.util.UUID
 
 @Entity
@@ -77,6 +78,7 @@ class Performance() {
     var totalTurretDamageDealt: Int = 0;
 
     @OneToMany(mappedBy = "performance", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
+    @BatchSize(size = 200)
     var items: MutableList<PerformanceItem> = mutableListOf();
 
     var soloKills: Int = 0;
