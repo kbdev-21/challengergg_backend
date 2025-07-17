@@ -8,6 +8,8 @@ import java.util.UUID
 interface MatchRepository: JpaRepository<Match, UUID> {
     fun findByMatchId(matchId: String): Match?;
 
+    fun findByMatchIdIn(matchIds: List<String>): List<Match>;
+
     /* custom queries */
     @Query(
         """

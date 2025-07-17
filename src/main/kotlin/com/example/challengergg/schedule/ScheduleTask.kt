@@ -18,7 +18,6 @@ class ScheduleTask(
 ) {
     @Scheduled(cron = "30 */10 * * * *")
     fun testSchedule() {
-        println("SCHEDULE: Start updating champion stats");
         val start = System.currentTimeMillis();
 
         analyticService.updateChampionStats();
@@ -31,7 +30,6 @@ class ScheduleTask(
     @Scheduled(cron = "0 */2 * * * *")
     @Transactional
     suspend fun fetchMatches() {
-        println("SCHEDULE: Start fetching matches");
         val start = System.currentTimeMillis();
 
         val eliteTiers = listOf(RankTier.CHALLENGER, RankTier.GRANDMASTER, RankTier.MASTER);

@@ -53,6 +53,9 @@ class MatchServiceImpl(
         val matchIds = riotApi.getMatchIdsByPuuid(puuid, null, 0, 20)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Puuid not found");
         val existedMatches = getExistedMatchesByMatchIds(matchIds);
+
+        if(existedMatches.size == matchIds.size) return existedMatches;
+
         val newRiotMatchDtos = getRiotMatchDtosByMatchIdsUnlessItExisted(matchIds, existedMatches);
 
         val newMatches = newRiotMatchDtos.map { dto ->
@@ -65,13 +68,7 @@ class MatchServiceImpl(
     }
 
     private fun getExistedMatchesByMatchIds(matchIds: List<String>): List<Match> {
-        val existedMatches = mutableListOf<Match>();
-        for(matchId in matchIds) {
-            val existedMatch = matchRepository.findByMatchId(matchId);
-            if(existedMatch != null) {
-                existedMatches.add(existedMatch);
-            }
-        }
+        val existedMatches = matchRepository.findByMatchIdIn(matchIds);
         return existedMatches;
     }
 
@@ -80,9 +77,10 @@ class MatchServiceImpl(
         existedMatches: List<Match>
     ): List<RiotMatchDto> {
         val existedMatchIds = existedMatches.map { it.matchId };
+        val newMatchIds = matchIds.filterNot { it in existedMatchIds };
+        if(newMatchIds.isEmpty()) return emptyList();
         val newMatchDtos = coroutineScope {
-            matchIds
-                .filterNot { it in existedMatchIds }
+            newMatchIds
                 .chunked(5)
                 .flatMap { chunk ->
                     chunk.map { matchId ->
