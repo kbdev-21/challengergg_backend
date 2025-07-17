@@ -57,7 +57,8 @@ class AnalyticServiceImpl(
             val pickRate = picks.toDouble() / totalMatches.toDouble();
             val winRate = wins.toDouble() / picks.toDouble();
 
-            if(pickRate < 0.005) {
+            val pickRateThreshold = 0.01;
+            if(pickRate < pickRateThreshold) {
                 continue;
             }
 
@@ -174,6 +175,7 @@ class AnalyticServiceImpl(
 
             newChampionStats.add(champStat);
         }
+        championStatRepository.deleteAll();
         championStatRepository.saveAll(newChampionStats);
     }
 
