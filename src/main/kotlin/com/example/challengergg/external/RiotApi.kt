@@ -4,6 +4,7 @@ import com.example.challengergg.common.enums.RankTier
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.external.dto.*
 import kotlinx.coroutines.reactor.awaitSingleOrNull
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -11,13 +12,14 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Component
-class RiotApi {
+class RiotApi(
+    @Value("\${riot.api.key}") private val apiKey: String,
+) {
     val webClient = WebClient.builder()
         .codecs { config ->
             config.defaultCodecs().maxInMemorySize(5 * 1024 * 1024)
         }
         .build();
-    private val apiKey = "RGAPI-40e8ffd8-f8b9-4236-b8c1-de645d0e2516";
 
     fun getAccountByNameAndTag(gameName: String, tagLine: String): RiotAccountDto? {
         val url = "https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/$gameName/$tagLine?api_key=$apiKey"
