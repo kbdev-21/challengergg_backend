@@ -57,7 +57,7 @@ class AnalyticServiceImpl(
             val pickRate = picks.toDouble() / totalMatches.toDouble();
             val winRate = wins.toDouble() / picks.toDouble();
 
-            val pickRateThreshold = 0.01;
+            val pickRateThreshold = 0.005;
             if(pickRate < pickRateThreshold) {
                 continue;
             }

@@ -27,13 +27,25 @@ class ScheduleTask(
         println("SCHEDULE: Finished update champion stats in ${elapsedSeconds}s");
     }
 
+
+    //@Scheduled(cron = "*/40 * * * * *")
     @Scheduled(cron = "0 */2 * * * *")
     @Transactional
     suspend fun fetchMatches() {
         val start = System.currentTimeMillis();
 
-        val eliteTiers = listOf(RankTier.CHALLENGER, RankTier.GRANDMASTER, RankTier.MASTER);
-        val randomTier = eliteTiers.random();
+        val eliteTiersWithRatios = listOf(
+            RankTier.CHALLENGER,
+            RankTier.CHALLENGER,
+            RankTier.GRANDMASTER,
+            RankTier.GRANDMASTER,
+            RankTier.GRANDMASTER,
+            RankTier.MASTER,
+            RankTier.MASTER,
+            RankTier.MASTER,
+            RankTier.MASTER
+        );
+        val randomTier = eliteTiersWithRatios.random();
         val randomRank = when (randomTier) {
             RankTier.CHALLENGER -> (0..299).random();
             RankTier.GRANDMASTER -> (0..699).random();
@@ -44,7 +56,7 @@ class ScheduleTask(
         val puuid = riotApi.getSoloDuoLeague(randomTier)?.entries?.get(randomRank)?.puuid
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
 
-        matchService.getMatchesByPuuid(puuid);
+        matchService.getMatchesByPuuid(puuid, 0, 20);
 
         val end = System.currentTimeMillis();
         val elapsedSeconds = (end - start) / 1000.0;
