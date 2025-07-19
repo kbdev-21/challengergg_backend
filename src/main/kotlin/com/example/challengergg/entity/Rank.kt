@@ -3,7 +3,6 @@ package com.example.challengergg.entity
 import com.example.challengergg.common.enums.RankDivision
 import com.example.challengergg.common.enums.QueueType
 import com.example.challengergg.common.enums.RankTier
-import com.example.challengergg.common.util.Algorithm
 import jakarta.persistence.*
 import java.util.*
 
@@ -18,7 +17,7 @@ class Rank() {
     var queue: QueueType = QueueType.UNK;
 
     @Enumerated(EnumType.STRING)
-    var tier: RankTier = RankTier.UNK;
+    var tier: RankTier = RankTier.UNRANKED;
 
     @Enumerated(EnumType.STRING)
     var division: RankDivision = RankDivision.I;

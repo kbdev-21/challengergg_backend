@@ -76,7 +76,7 @@ class Algorithm {
     }
 
     fun calculateRankPower(tier: RankTier, division: RankDivision, points: Int): Int {
-        if(tier == RankTier.UNK) return -1;
+        if(tier == RankTier.UNRANKED) return -1;
 
         val pointsEachDivision = 100;
         val divisionsEachTier = 4;

@@ -60,7 +60,7 @@ class RiotApi(
     fun getMatchIdsByPuuid(puuid: String, queue: Int?, start: Int, count: Int): List<String>? {
         //solo 420, flex 440
         val realQueue = queue ?: "";
-        val url = "https://sea.api.riotgames.com/lol/match/v5/matches/by-puuid/$puuid/ids?queue=$realQueue&start=${start}&count=$count&api_key=$apiKey";
+        val url = "https://sea.api.riotgames.com/lol/match/v5/matches/by-puuid/$puuid/ids?queue=$realQueue&start=$start&count=$count&api_key=$apiKey";
         return webClient.get()
             .uri(url)
             .retrieve()

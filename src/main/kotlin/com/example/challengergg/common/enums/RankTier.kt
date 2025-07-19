@@ -1,7 +1,7 @@
 package com.example.challengergg.common.enums
 
 enum class RankTier(val weight: Int) {
-    UNK(-1),
+    UNRANKED(-1),
     IRON(0),
     BRONZE(1),
     SILVER(2),

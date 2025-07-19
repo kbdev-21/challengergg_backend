@@ -19,7 +19,7 @@ class PlayerDto {
 
 class RankDto {
     var queue: QueueType = QueueType.UNK;
-    var tier: RankTier = RankTier.UNK;
+    var tier: RankTier = RankTier.UNRANKED;
     var division: RankDivision = RankDivision.I;
     var points: Int = 0;
     var wins: Int = 0;
