@@ -218,16 +218,22 @@ class MatchServiceImpl(
             val kbScore = algorithm.calculateKbScore(performance, performances, match.duration);
             performance.kbScore = kbScore;
         }
+
+        var hasMvp = false;
+        var hasSvp = false;
         performances
             .sortedByDescending { it.kbScore }
             .forEachIndexed { index, performance ->
                 performance.kbScorePlacement = index + 1;
-                if(index == 0) performance.mvp = true;
+                if(performance.win && !hasMvp) {
+                    performance.mvp = true;
+                    hasMvp = true;
+                }
+                if(!performance.win && !hasSvp) {
+                    performance.svp = true;
+                    hasSvp = true;
+                }
             }
-        performances
-            .filter { !it.win }
-            .maxByOrNull { it.kbScore }
-            ?.let { it.svp = true }
 
         return performances;
     }

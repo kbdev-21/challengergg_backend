@@ -16,7 +16,7 @@ class ScheduleTask(
     private val riotApi: RiotApi,
     private val matchService: MatchService
 ) {
-    @Scheduled(cron = "30 */10 * * * *")
+    @Scheduled(cron = "0 0 */1 * * *")
     fun testSchedule() {
         val start = System.currentTimeMillis();
 
