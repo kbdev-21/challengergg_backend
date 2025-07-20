@@ -19,6 +19,11 @@ class SearchingServiceImpl(
     override fun searchAll(key: String): SearchAllResultDto {
         val players = playerRepository.searchForSearchNameByKey(key);
         val champions = championStatRepository.searchForNameOrDisplayNameByKey(key);
+
+        players.forEach { player ->
+            player.ranks.sortByDescending { it.power }
+        }
+
         val result = SearchAllResultDto();
         result.players = players.map { player -> modelMapper.map(player, PlayerDto::class.java) }
             .take(5);
