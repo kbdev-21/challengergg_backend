@@ -17,7 +17,7 @@ class ScheduleTask(
     private val matchService: MatchService
 ) {
     @Scheduled(cron = "0 0 */1 * * *")
-    fun testSchedule() {
+    fun updateChampionStats() {
         val start = System.currentTimeMillis();
 
         analyticService.updateChampionStats();

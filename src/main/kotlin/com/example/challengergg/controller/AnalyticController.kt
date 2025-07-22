@@ -19,7 +19,7 @@ class AnalyticController(
     }
 
     @GetMapping("/api/v1/analytics/champstats")
-    fun getChampStats(): List<ChampionStatSummaryDto> {
+    fun getChampStats(): List<ChampionStatDetailDto> {
         return analyticService.getAllChampionStats();
     }
 

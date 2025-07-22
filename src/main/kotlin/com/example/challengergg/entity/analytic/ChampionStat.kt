@@ -48,6 +48,12 @@ class ChampionStat {
 
     var avgDpm: Double = 0.0;
 
+    var avgPhysicalDmg: Double = 0.0;
+
+    var avgMagicDmg: Double = 0.0
+
+    var avgTrueDmg: Double = 0.0
+
     var avgTdpm: Double = 0.0;
 
     var avgPenta: Double = 0.0;

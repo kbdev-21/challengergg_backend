@@ -9,6 +9,9 @@ interface ChampionAvgStatsTable {
     fun getAvgGpm(): Double
     fun getAvgCspm(): Double
     fun getAvgDpm(): Double
+    fun getAvgPhysicalDmg(): Double
+    fun getAvgMagicDmg(): Double
+    fun getAvgTrueDmg(): Double
     fun getAvgTdpm(): Double
     fun getAvgPenta(): Double
     fun getAvgSolokills(): Double

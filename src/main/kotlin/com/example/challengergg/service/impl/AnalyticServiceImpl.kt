@@ -26,12 +26,12 @@ class AnalyticServiceImpl(
     private val modelMapper = ModelMapper();
     private val stringUtil = StringUtil();
 
-    override fun getAllChampionStats(): List<ChampionStatSummaryDto> {
+    override fun getAllChampionStats(): List<ChampionStatDetailDto> {
         return championStatRepository
             .findAll()
             .sortedByDescending { it.power }
             .map { stat ->
-                modelMapper.map(stat, ChampionStatSummaryDto::class.java);
+                modelMapper.map(stat, ChampionStatDetailDto::class.java);
             }
     }
 

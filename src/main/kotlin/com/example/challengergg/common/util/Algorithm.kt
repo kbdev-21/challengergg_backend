@@ -53,15 +53,23 @@ class Algorithm {
     }
 
     fun calculateChampPower(pickRate: Double, winRate: Double): Int {
-        var pickScore = pickRate*100;
-        if(pickScore > 10) pickScore = 10.0;
-        if(pickScore < 0) pickScore = 0.0;
+        val winWeight = 65;
+        val pickWeight = 35;
 
-        var winScore = winRate*100 - 45;
-        if(winScore > 10) winScore = 10.0;
-        if(winScore < 0) winScore = 0.0;
+        val maxWinRate = 0.55;
+        val minWinRate = 0.45;
+        val maxPickRate = 0.08;
+        val minPickRate = 0.0;
 
-        val powerScore = (winScore/10)*65 + (pickScore/10)*35;
+        var winScoreRatio = (winRate - minWinRate) / (maxWinRate - minWinRate);
+        if(winScoreRatio > 1) winScoreRatio = 1.0;
+        if(winScoreRatio < 0) winScoreRatio = 0.0;
+
+        var pickScoreRatio = (pickRate - minPickRate) / (maxPickRate - minPickRate);
+        if(pickScoreRatio > 1) pickScoreRatio = 1.0;
+        if(pickScoreRatio < 0) pickScoreRatio = 0.0;
+
+        val powerScore = winScoreRatio*winWeight + pickScoreRatio*pickWeight;
         return powerScore.toInt();
     }
 

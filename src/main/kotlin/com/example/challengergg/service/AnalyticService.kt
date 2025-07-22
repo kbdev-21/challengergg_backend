@@ -4,7 +4,7 @@ import com.example.challengergg.dto.ChampionStatDetailDto
 import com.example.challengergg.dto.ChampionStatSummaryDto
 
 interface AnalyticService {
-    fun getAllChampionStats(): List<ChampionStatSummaryDto>;
+    fun getAllChampionStats(): List<ChampionStatDetailDto>;
 
     fun getChampionStatsByChampionName(championName: String): List<ChampionStatDetailDto>;
 
