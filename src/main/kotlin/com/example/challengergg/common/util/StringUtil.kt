@@ -31,7 +31,8 @@ class StringUtil {
             "Reneta" -> return "Reneta Glasc";
             "Velkoz" -> return "Vel'Koz";
             "XinZhao" -> return "Xin Zhao";
-            "Belveth" -> return "Bel'Veth"
+            "Belveth" -> return "Bel'Veth";
+            "MasterYi" -> return "Master Yi";
             else -> return name;
         }
     }
