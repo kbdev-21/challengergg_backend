@@ -34,8 +34,8 @@ class MatchServiceImpl(
     private val stringUtil = StringUtil();
     private val matchMapper = MatchMapper();
 
-    override suspend fun getMatchesByPuuid(puuid: String, start: Int, count: Int): List<MatchDto> {
-        val playerMatches = getMatchesAndSaveNewOnesByPuuid(puuid, start, count);
+    override suspend fun getMatchesByPuuid(puuid: String, queue: Int?, start: Int, count: Int): List<MatchDto> {
+        val playerMatches = getMatchesAndSaveNewOnesByPuuid(puuid, queue, start, count);
 
         return playerMatches
             .sortedByDescending { it.startTimeStamp }
@@ -45,17 +45,18 @@ class MatchServiceImpl(
     override suspend fun getMatchesByGameNameAndTagLine(
         gameName: String,
         tagLine: String,
+        queue: Int?,
         start: Int,
         count: Int
     ): List<MatchDto> {
         val puuid = riotApi.getAccountByNameAndTag(gameName, tagLine)?.puuid
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Account not found");
 
-        return getMatchesByPuuid(puuid, start, count);
+        return getMatchesByPuuid(puuid, queue, start, count);
     }
 
-    private suspend fun getMatchesAndSaveNewOnesByPuuid(puuid: String, start: Int, count: Int): List<Match> {
-        val matchIds = riotApi.getMatchIdsByPuuid(puuid, null, start, count)
+    private suspend fun getMatchesAndSaveNewOnesByPuuid(puuid: String, queue: Int?, start: Int, count: Int): List<Match> {
+        val matchIds = riotApi.getMatchIdsByPuuid(puuid, queue, start, count)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Puuid not found");
         val existedMatches = getExistedMatchesByMatchIds(matchIds);
 

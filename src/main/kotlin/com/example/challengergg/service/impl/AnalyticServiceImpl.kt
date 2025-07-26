@@ -114,7 +114,7 @@ class AnalyticServiceImpl(
                 .countAllRankedItemIdsByChampPosCode(champPosCodeData.getValue(), ItemType.LEGENDARY.toString());
 
             val legendaryItemStats = mutableListOf<ItemStat>();
-            allLegendaryItemIdsCount.take(10).forEach { count ->
+            allLegendaryItemIdsCount.take(15).forEach { count ->
                 val itemStat = ItemStat();
                 itemStat.itemId = count.getValue();
                 itemStat.picks = count.getCount();

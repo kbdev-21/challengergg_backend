@@ -29,7 +29,7 @@ class ScheduleTask(
 
 
     //@Scheduled(cron = "*/40 * * * * *")
-    @Scheduled(cron = "0 */2 * * * *")
+    @Scheduled(cron = "0 */1 * * * *")
     @Transactional
     suspend fun fetchMatches() {
         val start = System.currentTimeMillis();
@@ -56,7 +56,7 @@ class ScheduleTask(
         val puuid = riotApi.getSoloDuoLeague(randomTier)?.entries?.get(randomRank)?.puuid
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
 
-        matchService.getMatchesByPuuid(puuid, 0, 20);
+        matchService.getMatchesByPuuid(puuid, 420, 0, 10);
 
         val end = System.currentTimeMillis();
         val elapsedSeconds = (end - start) / 1000.0;

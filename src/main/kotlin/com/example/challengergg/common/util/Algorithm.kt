@@ -53,11 +53,11 @@ class Algorithm {
     }
 
     fun calculateChampPower(pickRate: Double, winRate: Double): Int {
-        val winWeight = 60;
-        val pickWeight = 40;
+        val winWeight = 65;
+        val pickWeight = 35;
 
-        val maxWinRate = 0.55;
-        val minWinRate = 0.45;
+        val maxWinRate = 0.54;
+        val minWinRate = 0.46;
         val maxPickRate = 0.075;
         val minPickRate = 0.0;
 

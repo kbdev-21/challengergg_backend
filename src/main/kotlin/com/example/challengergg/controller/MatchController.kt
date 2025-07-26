@@ -17,7 +17,7 @@ class MatchController(
         @RequestParam start: Int?,
         @RequestParam count: Int?
     ): List<MatchDto> {
-        return matchService.getMatchesByPuuid(puuid, start ?: 0, count ?: 20);
+        return matchService.getMatchesByPuuid(puuid, null,start ?: 0, count ?: 20);
     }
 
     @GetMapping("/api/v1/matches/by-riotid/{gameName}/{tagLine}")
@@ -27,7 +27,7 @@ class MatchController(
         @RequestParam start: Int?,
         @RequestParam count: Int?
     ): List<MatchDto> {
-        return matchService.getMatchesByGameNameAndTagLine(gameName, tagLine, start ?: 0, count ?: 20);
+        return matchService.getMatchesByGameNameAndTagLine(gameName, tagLine, null,start ?: 0, count ?: 20);
     }
 
 }
