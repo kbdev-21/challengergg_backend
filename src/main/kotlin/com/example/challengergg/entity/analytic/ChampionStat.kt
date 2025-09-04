@@ -1,7 +1,7 @@
 package com.example.challengergg.entity.analytic
 
-import com.example.challengergg.common.enums.ChampTier
-import com.example.challengergg.common.enums.PlayerPosition
+import com.example.challengergg.enums.ChampTier
+import com.example.challengergg.enums.PlayerPosition
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes

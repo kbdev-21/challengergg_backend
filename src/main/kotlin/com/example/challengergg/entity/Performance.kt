@@ -1,7 +1,7 @@
 package com.example.challengergg.entity
 
-import com.example.challengergg.common.enums.PlayerPosition
-import com.example.challengergg.common.enums.TeamCode
+import com.example.challengergg.enums.PlayerPosition
+import com.example.challengergg.enums.TeamCode
 import jakarta.persistence.*
 import org.hibernate.annotations.BatchSize
 import java.util.UUID
@@ -49,7 +49,7 @@ class Performance() {
 
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "rune_id")
-    var rune: Rune = Rune();
+    var rune: PerformanceRune = PerformanceRune();
 
     var kills: Int = 0;
 

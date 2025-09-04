@@ -1,11 +1,10 @@
 package com.example.challengergg.service.impl
 
-import com.example.challengergg.common.enums.ItemType
-import com.example.challengergg.common.enums.PlayerPosition
+import com.example.challengergg.enums.ItemType
+import com.example.challengergg.enums.PlayerPosition
 import com.example.challengergg.common.util.Algorithm
 import com.example.challengergg.common.util.StringUtil
 import com.example.challengergg.dto.ChampionStatDetailDto
-import com.example.challengergg.dto.ChampionStatSummaryDto
 import com.example.challengergg.entity.analytic.*
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.repository.ChampionStatRepository

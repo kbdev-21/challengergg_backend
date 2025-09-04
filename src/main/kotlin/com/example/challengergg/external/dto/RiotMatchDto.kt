@@ -110,7 +110,7 @@ data class ParticipantDto(
     var wardsKilled: Int,
     var wardsPlaced: Int,
     var win: Boolean,
-    var challenges: ChallengesDto,
+    var challenges: ChallengesDto?,
     var perks: PerksDto,
 )
 

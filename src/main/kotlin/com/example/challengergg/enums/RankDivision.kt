@@ -1,4 +1,4 @@
-package com.example.challengergg.common.enums
+package com.example.challengergg.enums
 
 enum class RankDivision(val weight: Int) {
     IV(0),

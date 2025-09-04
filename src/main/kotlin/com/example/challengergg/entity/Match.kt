@@ -1,7 +1,9 @@
 package com.example.challengergg.entity
 
-import com.example.challengergg.common.enums.QueueType
-import com.example.challengergg.common.enums.TeamCode
+import com.example.challengergg.enums.QueueType
+import com.example.challengergg.enums.RankTier
+import com.example.challengergg.enums.Region
+import com.example.challengergg.enums.TeamCode
 import jakarta.persistence.*
 import org.hibernate.annotations.BatchSize
 import java.util.*
@@ -21,12 +23,20 @@ class Match {
     @Enumerated(EnumType.STRING)
     var queue: QueueType = QueueType.UNK;
 
+    @Enumerated(EnumType.STRING)
+    var region: Region = Region.VN;
+
+    @Enumerated(EnumType.STRING)
+    var avgRank: RankTier? = null;
+
+    var avgRankPower: Int? = null;
+
     var duration: Long = 0;
 
     var startTimeStamp: Long = 0;
 
     @OneToMany(mappedBy = "match", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @BatchSize(size = 20)
-    var performances: MutableList<Performance> = mutableListOf()
+    var performances: MutableList<Performance> = mutableListOf();
 
 }

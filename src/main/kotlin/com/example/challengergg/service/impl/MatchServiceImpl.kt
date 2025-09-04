@@ -1,15 +1,12 @@
 package com.example.challengergg.service.impl
 
-import com.example.challengergg.common.enums.ItemType
-import com.example.challengergg.common.enums.PlayerPosition
-import com.example.challengergg.common.enums.QueueType
-import com.example.challengergg.common.enums.TeamCode
 import com.example.challengergg.common.util.Algorithm
 import com.example.challengergg.common.util.StringUtil
 import com.example.challengergg.dto.MatchDto
 import com.example.challengergg.entity.PerformanceItem
 import com.example.challengergg.entity.Match
 import com.example.challengergg.entity.Performance
+import com.example.challengergg.enums.*
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.external.RiotApi
 import com.example.challengergg.external.dto.ParticipantDto
@@ -34,8 +31,8 @@ class MatchServiceImpl(
     private val stringUtil = StringUtil();
     private val matchMapper = MatchMapper();
 
-    override suspend fun getMatchesByPuuid(puuid: String, queue: Int?, start: Int, count: Int): List<MatchDto> {
-        val playerMatches = getMatchesAndSaveNewOnesByPuuid(puuid, queue, start, count);
+    override suspend fun getMatchesByPuuid(puuid: String, queue: Int?, start: Int, count: Int, region: Region): List<MatchDto> {
+        val playerMatches = getMatchesAndSaveNewOnesByPuuid(puuid, queue, start, count, region);
 
         return playerMatches
             .sortedByDescending { it.startTimeStamp }
@@ -47,25 +44,26 @@ class MatchServiceImpl(
         tagLine: String,
         queue: Int?,
         start: Int,
-        count: Int
+        count: Int,
+        region: Region
     ): List<MatchDto> {
-        val puuid = riotApi.getAccountByNameAndTag(gameName, tagLine)?.puuid
+        val puuid = riotApi.getAccountByNameAndTag(gameName, tagLine, region)?.puuid
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Account not found");
 
-        return getMatchesByPuuid(puuid, queue, start, count);
+        return getMatchesByPuuid(puuid, queue, start, count, region);
     }
 
-    private suspend fun getMatchesAndSaveNewOnesByPuuid(puuid: String, queue: Int?, start: Int, count: Int): List<Match> {
-        val matchIds = riotApi.getMatchIdsByPuuid(puuid, queue, start, count)
+    private suspend fun getMatchesAndSaveNewOnesByPuuid(puuid: String, queue: Int?, start: Int, count: Int, region: Region): List<Match> {
+        val matchIds = riotApi.getMatchIdsByPuuid(puuid, queue, start, count, region)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Puuid not found");
         val existedMatches = getExistedMatchesByMatchIds(matchIds);
 
         if(existedMatches.size == matchIds.size) return existedMatches;
 
-        val newRiotMatchDtos = getRiotMatchDtosByMatchIdsUnlessItExisted(matchIds, existedMatches);
+        val newRiotMatchDtos = getRiotMatchDtosByMatchIdsUnlessItExisted(matchIds, existedMatches, region);
 
         val newMatches = newRiotMatchDtos.map { dto ->
-            getMatchByRiotMatchDto(dto);
+            getMatchByRiotMatchDto(dto, region);
         }.toList();
         val savedMatches = matchRepository.saveAll(newMatches);
         println("NOTE: Saved ${savedMatches.size} new matches"); // PRINT
@@ -80,7 +78,8 @@ class MatchServiceImpl(
 
     private suspend fun getRiotMatchDtosByMatchIdsUnlessItExisted(
         matchIds: List<String>,
-        existedMatches: List<Match>
+        existedMatches: List<Match>,
+        region: Region
     ): List<RiotMatchDto> {
         val existedMatchIds = existedMatches.map { it.matchId };
         val newMatchIds = matchIds.filterNot { it in existedMatchIds };
@@ -91,7 +90,7 @@ class MatchServiceImpl(
                 .flatMap { chunk ->
                     chunk.map { matchId ->
                         async {
-                            riotApi.getMatchByMatchId(matchId)
+                            riotApi.getMatchByMatchId(matchId, region)
                                 ?: throw CustomException(HttpStatus.NOT_FOUND, "Match not found: $matchId");
                         }
                     }.awaitAll();
@@ -101,7 +100,7 @@ class MatchServiceImpl(
         return newMatchDtos;
     }
 
-    private fun getMatchByRiotMatchDto(riotMatchDto: RiotMatchDto): Match {
+    private fun getMatchByRiotMatchDto(riotMatchDto: RiotMatchDto, region: Region): Match {
         val match = Match();
         match.matchId = riotMatchDto.metadata.matchId;
         match.queue = when (riotMatchDto.info.queueId) {
@@ -114,6 +113,7 @@ class MatchServiceImpl(
         match.duration = riotMatchDto.info.gameDuration;
         match.startTimeStamp = riotMatchDto.info.gameStartTimestamp;
         match.performances = getPerformancesByRiotParticipantDto(riotMatchDto.info.participants, match);
+        match.region = region;
 
         return match;
     }
@@ -155,8 +155,8 @@ class MatchServiceImpl(
             performance.kills = dto.kills;
             performance.deaths = dto.deaths;
             performance.assists = dto.assists;
-            performance.kda = dto.challenges.kda.toDouble();
-            performance.killParticipation = dto.challenges.killParticipation.toDouble();
+            performance.kda = if(performance.deaths == 0) (performance.kills + performance.assists).toDouble() else (performance.kills + performance.assists).toDouble()/performance.deaths;
+            performance.killParticipation = dto.challenges?.killParticipation?.toDouble() ?: 0.0;
             val minutes = (match.duration/60).toInt();
             performance.totalCs = dto.totalMinionsKilled + dto.neutralMinionsKilled;
             performance.csPerMin = performance.totalCs.toDouble() / minutes;
@@ -185,7 +185,7 @@ class MatchServiceImpl(
                     else -> ItemType.LEGENDARY;
                 }
             }
-            performance.soloKills = dto.challenges.soloKills;
+            performance.soloKills = dto.challenges?.soloKills ?:  0;
             performance.doubleKills = dto.doubleKills;
             performance.tripleKills = dto.tripleKills;
             performance.quadraKills = dto.quadraKills;

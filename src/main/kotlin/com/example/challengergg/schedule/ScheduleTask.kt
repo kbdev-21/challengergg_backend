@@ -1,6 +1,7 @@
 package com.example.challengergg.schedule
 
-import com.example.challengergg.common.enums.RankTier
+import com.example.challengergg.enums.RankTier
+import com.example.challengergg.enums.Region
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.external.RiotApi
 import com.example.challengergg.service.AnalyticService
@@ -52,14 +53,27 @@ class ScheduleTask(
             RankTier.MASTER -> (0..999).random();
             else -> -1;
         };
+        val randomRegion = Region.VN;
+        val regions = Region.entries;
 
-        val puuid = riotApi.getSoloDuoLeague(randomTier)?.entries?.get(randomRank)?.puuid
-            ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
+        regions.forEach { region ->
+            val puuid = riotApi.getSoloDuoLeague(randomTier, region)?.entries?.get(randomRank)?.puuid
+                ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
 
-        matchService.getMatchesByPuuid(puuid, 420, 0, 10);
+            matchService.getMatchesByPuuid(puuid, 420, 0, 10, region);
 
-        val end = System.currentTimeMillis();
-        val elapsedSeconds = (end - start) / 1000.0;
-        println("SCHEDULE: Finished fetch $puuid (${randomTier.toString()}) matches in ${elapsedSeconds}s");
+            val end = System.currentTimeMillis();
+            val elapsedSeconds = (end - start) / 1000.0;
+            println("SCHEDULE: Finished fetch $puuid (${randomTier.toString()}) matches in ${elapsedSeconds}s (${region.toString()} server)");
+        }
+
+//        val puuid = riotApi.getSoloDuoLeague(randomTier, randomRegion)?.entries?.get(randomRank)?.puuid
+//            ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
+//
+//        matchService.getMatchesByPuuid(puuid, 420, 0, 10, randomRegion);
+//
+//        val end = System.currentTimeMillis();
+//        val elapsedSeconds = (end - start) / 1000.0;
+//        println("SCHEDULE: Finished fetch $puuid (${randomTier.toString()}) matches in ${elapsedSeconds}s");
     }
 }

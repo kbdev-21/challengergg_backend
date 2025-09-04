@@ -1,7 +1,7 @@
 package com.example.challengergg.dto
 
-import com.example.challengergg.common.enums.ChampTier
-import com.example.challengergg.common.enums.PlayerPosition
+import com.example.challengergg.enums.ChampTier
+import com.example.challengergg.enums.PlayerPosition
 import com.example.challengergg.entity.analytic.ItemStat
 import com.example.challengergg.entity.analytic.MatchUpStat
 import com.example.challengergg.entity.analytic.RuneStat

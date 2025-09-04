@@ -1,6 +1,7 @@
 package com.example.challengergg.external
 
-import com.example.challengergg.common.enums.RankTier
+import com.example.challengergg.enums.RankTier
+import com.example.challengergg.enums.Region
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.external.dto.*
 import kotlinx.coroutines.reactor.awaitSingleOrNull
@@ -21,84 +22,99 @@ class RiotApi(
         }
         .build();
 
-    fun getAccountByNameAndTag(gameName: String, tagLine: String): RiotAccountDto? {
-        val url = "https://asia.api.riotgames.com/riot/account/v1/accounts/by-riot-id/$gameName/$tagLine?api_key=$apiKey"
+    fun getAccountByNameAndTag(gameName: String, tagLine: String, region: Region): RiotAccountDto? {
+        val cluster = region.riotClusterIdForAccount;
+
+        val url =
+            "https://$cluster.api.riotgames.com/riot/account/v1/accounts/by-riot-id/$gameName/$tagLine?api_key=$apiKey"
         return webClient.get()
             .uri(url)
             .retrieve()
-            .onStatus({it.isSameCodeAs(HttpStatus.NOT_FOUND)}) {
+            .onStatus({ it.isSameCodeAs(HttpStatus.NOT_FOUND) }) {
                 Mono.error(CustomException(HttpStatus.NOT_FOUND, "Not found"));
             }
             .bodyToMono(RiotAccountDto::class.java)
             .block();
     }
 
-    fun getSummonerByPuuid(puuid: String): RiotSummonerDto? {
-        val url = "https://vn2.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/$puuid?api_key=$apiKey";
+    fun getSummonerByPuuid(puuid: String, region: Region): RiotSummonerDto? {
+        val regionId = region.riotRegionId;
+
+        val url = "https://$regionId.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/$puuid?api_key=$apiKey";
         return webClient.get()
             .uri(url)
             .retrieve()
-            .onStatus({it.isSameCodeAs(HttpStatus.NOT_FOUND)}) {
+            .onStatus({ it.isSameCodeAs(HttpStatus.NOT_FOUND) }) {
                 Mono.error(CustomException(HttpStatus.NOT_FOUND, "Not found"));
             }
             .bodyToMono(RiotSummonerDto::class.java)
             .block();
     }
 
-    fun getLeagueEntriesByPuuid(puuid: String): List<RiotLeagueEntryDto>? {
-        val url = "https://vn2.api.riotgames.com/lol/league/v4/entries/by-puuid/$puuid?api_key=$apiKey";
+    fun getLeagueEntriesByPuuid(puuid: String, region: Region): List<RiotLeagueEntryDto>? {
+        val regionId = region.riotRegionId;
+
+        val url = "https://$regionId.api.riotgames.com/lol/league/v4/entries/by-puuid/$puuid?api_key=$apiKey";
         return webClient.get()
             .uri(url)
             .retrieve()
-            .onStatus({it.isSameCodeAs(HttpStatus.NOT_FOUND)}) {
+            .onStatus({ it.isSameCodeAs(HttpStatus.NOT_FOUND) }) {
                 Mono.error(CustomException(HttpStatus.NOT_FOUND, "Not found"));
             }
             .bodyToMono(object : ParameterizedTypeReference<List<RiotLeagueEntryDto>>() {})
             .block();
     }
 
-    fun getMatchIdsByPuuid(puuid: String, queueId: Int?, start: Int, count: Int): List<String>? {
+    suspend fun getMatchIdsByPuuid(puuid: String, queueId: Int?, start: Int, count: Int, region: Region): List<String>? {
+        val cluster = region.riotClusterId;
+
         //solo 420, flex 440
         val realQueue = queueId ?: "";
-        val url = "https://sea.api.riotgames.com/lol/match/v5/matches/by-puuid/$puuid/ids?queue=$realQueue&start=$start&count=$count&api_key=$apiKey";
+        val url =
+            "https://$cluster.api.riotgames.com/lol/match/v5/matches/by-puuid/$puuid/ids?queue=$realQueue&start=$start&count=$count&api_key=$apiKey";
         return webClient.get()
             .uri(url)
             .retrieve()
-            .onStatus({it.isSameCodeAs(HttpStatus.NOT_FOUND)}) {
+            .onStatus({ it.isSameCodeAs(HttpStatus.NOT_FOUND) }) {
                 Mono.error(CustomException(HttpStatus.NOT_FOUND, "Not found"));
             }
             .bodyToMono(object : ParameterizedTypeReference<List<String>>() {})
-            .block();
+            .awaitSingleOrNull();
     }
 
-     suspend fun getMatchByMatchId(matchId: String): RiotMatchDto? {
-        val url = "https://sea.api.riotgames.com/lol/match/v5/matches/$matchId?api_key=$apiKey";
+    suspend fun getMatchByMatchId(matchId: String, region: Region): RiotMatchDto? {
+        val cluster = region.riotClusterId;
+
+        val url = "https://$cluster.api.riotgames.com/lol/match/v5/matches/$matchId?api_key=$apiKey";
         return webClient.get()
             .uri(url)
             .retrieve()
-            .onStatus({it.isSameCodeAs(HttpStatus.NOT_FOUND)}) {
+            .onStatus({ it.isSameCodeAs(HttpStatus.NOT_FOUND) }) {
                 Mono.error(CustomException(HttpStatus.NOT_FOUND, "Not found"));
             }
             .bodyToMono(RiotMatchDto::class.java)
             .awaitSingleOrNull();
     }
 
-    fun getSoloDuoLeague(tier: RankTier): RiotLeagueListDto? {
-        if(tier.weight < RankTier.MASTER.weight) return null;
+    suspend fun getSoloDuoLeague(tier: RankTier, region: Region): RiotLeagueListDto? {
+        if (tier.weight < RankTier.MASTER.weight) return null;
         val reqTierString = when (tier) {
             RankTier.MASTER -> "masterleagues";
             RankTier.GRANDMASTER -> "grandmasterleagues";
             RankTier.CHALLENGER -> "challengerleagues";
             else -> return null;
         }
-        val url = "https://vn2.api.riotgames.com/lol/league/v4/$reqTierString/by-queue/RANKED_SOLO_5x5?api_key=$apiKey";
+
+        val regionId = region.riotRegionId;
+
+        val url = "https://$regionId.api.riotgames.com/lol/league/v4/$reqTierString/by-queue/RANKED_SOLO_5x5?api_key=$apiKey";
         return webClient.get()
             .uri(url)
             .retrieve()
-            .onStatus({it.isSameCodeAs(HttpStatus.NOT_FOUND)}) {
+            .onStatus({ it.isSameCodeAs(HttpStatus.NOT_FOUND) }) {
                 Mono.error(CustomException(HttpStatus.NOT_FOUND, "Not found"));
             }
             .bodyToMono(RiotLeagueListDto::class.java)
-            .block();
+            .awaitSingleOrNull();
     }
 }

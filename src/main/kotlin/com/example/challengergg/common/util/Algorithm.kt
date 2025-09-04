@@ -1,7 +1,10 @@
 package com.example.challengergg.common.util
 
-import com.example.challengergg.common.enums.*
 import com.example.challengergg.entity.Performance
+import com.example.challengergg.enums.ChampTier
+import com.example.challengergg.enums.PlayerPosition
+import com.example.challengergg.enums.RankDivision
+import com.example.challengergg.enums.RankTier
 
 class Algorithm {
     fun calculateKbScore(performance: Performance, otherPerformances: List<Performance>, gameDuration: Long): Int {

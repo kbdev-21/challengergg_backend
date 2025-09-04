@@ -1,4 +1,4 @@
-package com.example.challengergg.common.enums
+package com.example.challengergg.enums
 
 enum class RankTier(val weight: Int) {
     UNRANKED(-1),

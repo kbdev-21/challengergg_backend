@@ -1,5 +1,6 @@
 package com.example.challengergg.entity
 
+import com.example.challengergg.enums.Region
 import jakarta.persistence.*
 import java.util.*
 
@@ -23,8 +24,11 @@ class Player {
 
     var summonerLevel: Long = 1;
 
+    @Enumerated(EnumType.STRING)
+    var region: Region = Region.VN;
+
     @OneToMany(mappedBy = "player", cascade = [(CascadeType.ALL)], orphanRemoval = true)
-    var ranks: MutableList<Rank> = mutableListOf();
+    var ranks: MutableList<PlayerRank> = mutableListOf();
 
     var createdAt: Date = Date();
 

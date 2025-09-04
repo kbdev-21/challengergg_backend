@@ -1,4 +1,4 @@
-package com.example.challengergg.common.enums
+package com.example.challengergg.enums
 
 enum class QueueType(val riotQueueId: Int = -1) {
     SOLO(420),

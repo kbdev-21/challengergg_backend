@@ -1,14 +1,14 @@
 package com.example.challengergg.entity
 
-import com.example.challengergg.common.enums.RankDivision
-import com.example.challengergg.common.enums.QueueType
-import com.example.challengergg.common.enums.RankTier
+import com.example.challengergg.enums.RankDivision
+import com.example.challengergg.enums.QueueType
+import com.example.challengergg.enums.RankTier
 import jakarta.persistence.*
 import java.util.*
 
 @Entity
 @Table(name = "ranks")
-class Rank() {
+class PlayerRank() {
     @Id
     @Column(name = "rank_id")
     var id: UUID = UUID.randomUUID();

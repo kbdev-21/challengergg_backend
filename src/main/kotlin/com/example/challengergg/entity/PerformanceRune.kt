@@ -7,7 +7,7 @@ import java.util.*
 
 @Entity
 @Table(name = "runes")
-class Rune {
+class PerformanceRune {
     @Id
     @Column(name = "rune_id")
     var id: UUID = UUID.randomUUID();

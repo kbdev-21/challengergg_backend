@@ -1,4 +1,4 @@
-package com.example.challengergg.common.enums
+package com.example.challengergg.enums
 
 enum class ItemType(val riotIdsList: List<Int>) {
     START(listOf(1056, 1054, 1055, 1082, 1083)),

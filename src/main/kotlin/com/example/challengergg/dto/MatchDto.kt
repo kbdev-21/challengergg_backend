@@ -1,13 +1,9 @@
 package com.example.challengergg.dto
 
-import com.example.challengergg.common.enums.PlayerPosition
-import com.example.challengergg.common.enums.QueueType
-import com.example.challengergg.common.enums.TeamCode
-import com.example.challengergg.entity.Match
-import com.example.challengergg.entity.PerformanceItem
-import com.example.challengergg.entity.Rune
-import jakarta.persistence.*
-import java.util.*
+import com.example.challengergg.enums.PlayerPosition
+import com.example.challengergg.enums.QueueType
+import com.example.challengergg.enums.Region
+import com.example.challengergg.enums.TeamCode
 
 class MatchDto {
     var matchId: String = "";
@@ -16,6 +12,7 @@ class MatchDto {
     var duration: Long = 0;
     var startTimeStamp: Long = 0;
     var performances: MutableList<PerformanceDto> = mutableListOf();
+    var region: Region = Region.VN;
 }
 
 class PerformanceDto {

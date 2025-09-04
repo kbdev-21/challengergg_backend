@@ -1,14 +1,14 @@
 package com.example.challengergg.service.impl
 
-import com.example.challengergg.common.enums.PlayerPosition
-import com.example.challengergg.common.enums.QueueType
-import com.example.challengergg.common.enums.RankDivision
-import com.example.challengergg.common.enums.RankTier
+import com.example.challengergg.enums.QueueType
+import com.example.challengergg.enums.RankDivision
+import com.example.challengergg.enums.RankTier
+import com.example.challengergg.enums.Region
 import com.example.challengergg.common.util.Algorithm
 import com.example.challengergg.common.util.StringUtil
 import com.example.challengergg.dto.PlayerDto
 import com.example.challengergg.entity.Player
-import com.example.challengergg.entity.Rank
+import com.example.challengergg.entity.PlayerRank
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.service.PlayerService
 import com.example.challengergg.external.RiotApi
@@ -19,8 +19,6 @@ import com.example.challengergg.repository.PlayerRepository
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 @Service
 class PlayerServiceImpl(
@@ -31,15 +29,15 @@ class PlayerServiceImpl(
     private val stringUtil = StringUtil();
     private val modelMapper = ModelMapper();
 
-    override fun getPlayerByGameNameAndTagLine(gameName: String, tagLine: String): PlayerDto {
-        val riotAccountDto = riotApi.getAccountByNameAndTag(gameName, tagLine)
+    override fun getPlayerByGameNameAndTagLine(gameName: String, tagLine: String, region: Region): PlayerDto {
+        val riotAccountDto = riotApi.getAccountByNameAndTag(gameName, tagLine, region)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Account not found");
-        val riotSummonerDto = riotApi.getSummonerByPuuid(riotAccountDto.puuid)
+        val riotSummonerDto = riotApi.getSummonerByPuuid(riotAccountDto.puuid, region)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Summoner not found");
-        val riotLeagueEntryDtos = riotApi.getLeagueEntriesByPuuid(riotAccountDto.puuid)
+        val riotLeagueEntryDtos = riotApi.getLeagueEntriesByPuuid(riotAccountDto.puuid, region)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "League entries not found");
 
-        val player = getPlayerByRiotDtos(riotAccountDto, riotSummonerDto, riotLeagueEntryDtos);
+        val player = getPlayerByRiotDtos(riotAccountDto, riotSummonerDto, riotLeagueEntryDtos, region);
         val savedPlayer = playerRepository.save(player);
 
         return modelMapper.map(savedPlayer, PlayerDto::class.java);
@@ -48,7 +46,8 @@ class PlayerServiceImpl(
     private fun getPlayerByRiotDtos(
         riotAccountDto: RiotAccountDto,
         riotSummonerDto: RiotSummonerDto,
-        riotLeagueEntryDtos: List<RiotLeagueEntryDto>
+        riotLeagueEntryDtos: List<RiotLeagueEntryDto>,
+        region: Region
     ): Player {
         if(riotAccountDto.puuid != riotSummonerDto.puuid
             || riotLeagueEntryDtos.any{it.puuid != riotAccountDto.puuid}) {
@@ -62,6 +61,7 @@ class PlayerServiceImpl(
         player.searchName = stringUtil.normalizeVietnamese(riotAccountDto.gameName + "#" + riotAccountDto.tagLine);
         player.profileIconId = riotSummonerDto.profileIconId;
         player.summonerLevel = riotSummonerDto.summonerLevel;
+        player.region = region;
 
         /* if player existed -> assign unchangeable fields from the old object to the new one
         * if new -> create 2 rank objects (solo and flex) */
@@ -73,10 +73,10 @@ class PlayerServiceImpl(
             player.ranks = existedPlayer.ranks;
         }
         else {
-            val rankSolo = Rank();
+            val rankSolo = PlayerRank();
             rankSolo.player = player;
             rankSolo.queue = QueueType.SOLO;
-            val rankFlex = Rank();
+            val rankFlex = PlayerRank();
             rankFlex.player = player;
             rankFlex.queue = QueueType.FLEX;
             player.ranks = mutableListOf(rankSolo, rankFlex);

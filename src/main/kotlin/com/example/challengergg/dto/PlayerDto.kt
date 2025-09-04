@@ -1,8 +1,9 @@
 package com.example.challengergg.dto
 
-import com.example.challengergg.common.enums.QueueType
-import com.example.challengergg.common.enums.RankDivision
-import com.example.challengergg.common.enums.RankTier
+import com.example.challengergg.enums.QueueType
+import com.example.challengergg.enums.RankDivision
+import com.example.challengergg.enums.RankTier
+import com.example.challengergg.enums.Region
 import java.util.Date
 
 class PlayerDto {
@@ -13,6 +14,7 @@ class PlayerDto {
     var profileIconId: Int = 1;
     var summonerLevel: Long = 1;
     var ranks: List<RankDto> = listOf();
+    var region: Region = Region.VN;
     var createdAt: Date = Date();
     var updatedAt: Date = Date();
 }

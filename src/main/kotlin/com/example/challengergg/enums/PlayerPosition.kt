@@ -1,4 +1,4 @@
-package com.example.challengergg.common.enums
+package com.example.challengergg.enums
 
 enum class PlayerPosition(val riotPositionString: String, val order: Int) {
     TOP("TOP",0),

@@ -1,6 +1,6 @@
 package com.example.challengergg.repository
 
-import com.example.challengergg.common.enums.ItemType
+import com.example.challengergg.enums.ItemType
 import com.example.challengergg.entity.Performance
 import com.example.challengergg.entity.query.ChampionAvgStatsTable
 import com.example.challengergg.entity.query.CountAndWinsTable

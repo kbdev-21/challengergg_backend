@@ -1,6 +1,6 @@
 package com.example.challengergg.entity
 
-import com.example.challengergg.common.enums.ItemType
+import com.example.challengergg.enums.ItemType
 import jakarta.persistence.*
 import java.util.UUID
 
