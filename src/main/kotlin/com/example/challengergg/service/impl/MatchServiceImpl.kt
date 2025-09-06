@@ -1,6 +1,7 @@
 package com.example.challengergg.service.impl
 
 import com.example.challengergg.common.util.Algorithm
+import com.example.challengergg.common.util.AppUtil
 import com.example.challengergg.common.util.StringUtil
 import com.example.challengergg.dto.MatchDto
 import com.example.challengergg.entity.PerformanceItem
@@ -29,6 +30,7 @@ class MatchServiceImpl(
 ): MatchService {
     private val algorithm = Algorithm();
     private val stringUtil = StringUtil();
+    private val appUtil = AppUtil();
     private val matchMapper = MatchMapper();
 
     override suspend fun getMatchesByPuuid(puuid: String, queue: Int?, start: Int, count: Int, region: Region): List<MatchDto> {
@@ -170,20 +172,13 @@ class MatchServiceImpl(
             performance.totalDamageTaken = dto.totalDamageTaken;
             performance.totalTurretDamageDealt = dto.damageDealtToBuildings;
             performance.turretDamagePerMin = performance.totalTurretDamageDealt / minutes;
-            val riotDtoItems = listOf(dto.item0, dto.item1, dto.item2, dto.item3, dto.item4, dto.item5, dto.item6);
-            performance.items = MutableList(riotDtoItems.size) {PerformanceItem()};
-            for ((i, item) in riotDtoItems.withIndex()) {
+            val riotDtoItemIds = listOf(dto.item0, dto.item1, dto.item2, dto.item3, dto.item4, dto.item5, dto.item6);
+            performance.items = MutableList(riotDtoItemIds.size) {PerformanceItem()};
+            for ((i, itemId) in riotDtoItemIds.withIndex()) {
                 performance.items[i].performance = performance;
-                performance.items[i].itemId = item;
+                performance.items[i].itemId = itemId;
                 performance.items[i].slot = i;
-                performance.items[i].type = when (item) {
-                    0 -> ItemType.EMPTY;
-                    in ItemType.START.riotIdsList -> ItemType.START;
-                    in ItemType.BASE.riotIdsList -> ItemType.BASE;
-                    in ItemType.BOOT.riotIdsList -> ItemType.BOOT;
-                    in ItemType.UTILITY.riotIdsList -> ItemType.UTILITY;
-                    else -> ItemType.LEGENDARY;
-                }
+                performance.items[i].type = appUtil.getItemType(itemId);
             }
             performance.soloKills = dto.challenges?.soloKills ?:  0;
             performance.doubleKills = dto.doubleKills;

@@ -35,6 +35,26 @@ enum class ItemType(val riotIdsList: List<Int>) {
             1031,
             3082,
             4630,
+            2508,
+            1026,
+            3211,
+            3066,
+            6660,
+            3105,
+            3134,
+            3044,
+            2003,
+            4632,
+            2422,
+            3140,
+            3051,
+            1102,
+            1101,
+            3024,
+            3057,
+            3077,
+            6690,
+            2020,
         )
     ),
     BOOT(listOf(3006, 3009, 3010, 3013, 3020, 3047, 3111, 3158)),
@@ -43,5 +63,6 @@ enum class ItemType(val riotIdsList: List<Int>) {
     OTHER(listOf()),
     EMPTY(listOf());
 }
+
 
 

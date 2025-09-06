@@ -3,9 +3,11 @@ package com.example.challengergg.service.impl
 import com.example.challengergg.enums.ItemType
 import com.example.challengergg.enums.PlayerPosition
 import com.example.challengergg.common.util.Algorithm
+import com.example.challengergg.common.util.AppUtil
 import com.example.challengergg.common.util.StringUtil
 import com.example.challengergg.dto.ChampionStatDetailDto
 import com.example.challengergg.entity.analytic.*
+import com.example.challengergg.entity.query.CountAndWinsTable
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.repository.ChampionStatRepository
 import com.example.challengergg.repository.MatchRepository
@@ -108,35 +110,13 @@ class AnalyticServiceImpl(
                 runeStats.add(runeStat);
             }
 
-            /* legendary items */
-            val allLegendaryItemIdsCount = performanceRepository
-                .countAllRankedItemIdsByChampPosCode(champPosCodeData.getValue(), ItemType.LEGENDARY.toString());
+            /* items */
+            val allItemIdsCount = performanceRepository
+                .countAllRankedItemIdsByChampPosCode(champPosCodeData.getValue());
 
-            val legendaryItemStats = mutableListOf<ItemStat>();
-            allLegendaryItemIdsCount.take(15).forEach { count ->
-                val itemStat = ItemStat();
-                itemStat.itemId = count.getValue();
-                itemStat.picks = count.getCount();
-                itemStat.pickRate = count.getCount().toDouble() / picks.toDouble();
-                itemStat.wins = count.getWins();
-                itemStat.winRate = count.getWins().toDouble() / count.getCount().toDouble();
-                legendaryItemStats.add(itemStat);
-            }
+            val legendaryItemStats = getItemStatsFromCountAndWinData(allItemIdsCount, ItemType.LEGENDARY, picks);
 
-            /* boot items */
-            val allBootItemIdsCount = performanceRepository
-                .countAllRankedItemIdsByChampPosCode(champPosCodeData.getValue(), ItemType.BOOT.toString());
-
-            val bootItemStats = mutableListOf<ItemStat>();
-            allBootItemIdsCount.take(5).forEach { count ->
-                val itemStat = ItemStat();
-                itemStat.itemId = count.getValue();
-                itemStat.picks = count.getCount();
-                itemStat.pickRate = count.getCount().toDouble() / picks.toDouble();
-                itemStat.wins = count.getWins();
-                itemStat.winRate = count.getWins().toDouble() / count.getCount().toDouble();
-                bootItemStats.add(itemStat);
-            }
+            val bootItemStats = getItemStatsFromCountAndWinData(allItemIdsCount, ItemType.BOOT, picks);
 
             /* matchups */
             val allMatchUpsCount = performanceRepository
@@ -178,5 +158,28 @@ class AnalyticServiceImpl(
         championStatRepository.saveAll(newChampionStats);
     }
 
+    private fun getItemStatsFromCountAndWinData(
+        itemIdsCount: List<CountAndWinsTable<Int>>,
+        itemType: ItemType,
+        picks: Int
+    ): List<ItemStat> {
+        val appUtil = AppUtil();
 
+        val filteredItemStats = mutableListOf<ItemStat>();
+
+        itemIdsCount
+            .take(100)
+            .filter { count -> itemType == appUtil.getItemType(count.getValue()) }
+            .forEach { count ->
+                val itemStat = ItemStat();
+                itemStat.itemId = count.getValue();
+                itemStat.picks = count.getCount();
+                itemStat.pickRate = count.getCount().toDouble() / picks.toDouble();
+                itemStat.wins = count.getWins();
+                itemStat.winRate = count.getWins().toDouble() / count.getCount().toDouble();
+                filteredItemStats.add(itemStat);
+            }
+
+        return filteredItemStats;
+    }
 }

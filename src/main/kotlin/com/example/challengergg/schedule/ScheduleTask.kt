@@ -19,7 +19,9 @@ class ScheduleTask(
 ) {
     @Scheduled(cron = "0 0 */1 * * *")
     fun updateChampionStats() {
+        println("SCHEDULE: Start update champion stats");
         val start = System.currentTimeMillis();
+
 
         analyticService.updateChampionStats();
 
@@ -76,14 +78,5 @@ class ScheduleTask(
             val elapsedSeconds = (end - start) / 1000.0;
             println("SCHEDULE: Finished fetch $matchPerFetch $puuid (${randomTier.toString()}) matches in ${elapsedSeconds}s (${region.toString()} server)");
         }
-
-//        val puuid = riotApi.getSoloDuoLeague(randomTier, randomRegion)?.entries?.get(randomRank)?.puuid
-//            ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
-//
-//        matchService.getMatchesByPuuid(puuid, 420, 0, 10, randomRegion);
-//
-//        val end = System.currentTimeMillis();
-//        val elapsedSeconds = (end - start) / 1000.0;
-//        println("SCHEDULE: Finished fetch $puuid (${randomTier.toString()}) matches in ${elapsedSeconds}s");
     }
 }

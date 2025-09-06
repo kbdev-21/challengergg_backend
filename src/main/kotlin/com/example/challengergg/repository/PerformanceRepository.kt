@@ -1,6 +1,5 @@
 package com.example.challengergg.repository
 
-import com.example.challengergg.enums.ItemType
 import com.example.challengergg.entity.Performance
 import com.example.challengergg.entity.query.ChampionAvgStatsTable
 import com.example.challengergg.entity.query.CountAndWinsTable
@@ -94,13 +93,28 @@ interface PerformanceRepository: JpaRepository<Performance, UUID> {
             JOIN public.matches m ON p.match_id = m.match_id
             WHERE m.queue IN ('SOLO', 'FLEX')
             AND p.champ_pos_code = :champPosCode
+            GROUP BY i.item_id
+            ORDER BY count DESC
+        """,
+        nativeQuery = true
+    )
+    fun countAllRankedItemIdsByChampPosCode(champPosCode: String): List<CountAndWinsTable<Int>>;
+
+    @Query(
+        """
+            SELECT i.item_id AS value, COUNT(*) AS count, COUNT(CASE WHEN p.win = true THEN 1 END) AS wins
+            FROM public.performance_items i
+            JOIN public.performances p ON i.performance_id = p.performance_id
+            JOIN public.matches m ON p.match_id = m.match_id
+            WHERE m.queue IN ('SOLO', 'FLEX')
+            AND p.champ_pos_code = :champPosCode
             AND i.type = :type
             GROUP BY i.item_id
             ORDER BY count DESC
         """,
         nativeQuery = true
     )
-    fun countAllRankedItemIdsByChampPosCode(champPosCode: String, type: String): List<CountAndWinsTable<Int>>;
+    fun countAllRankedItemIdsByChampPosCodeAndType(champPosCode: String, type: String): List<CountAndWinsTable<Int>>;
 
     @Query(
         """
