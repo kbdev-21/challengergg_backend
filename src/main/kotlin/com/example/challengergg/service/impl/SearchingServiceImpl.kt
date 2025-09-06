@@ -26,9 +26,9 @@ class SearchingServiceImpl(
 
         val result = SearchAllResultDto();
         result.players = players.map { player -> modelMapper.map(player, PlayerDto::class.java) }
-            .take(5);
+            .take(20);
         result.champions = champions.map { champ -> modelMapper.map(champ, ChampionStatSummaryDto::class.java) }
-            .take(5);
+            .take(20);
         return result;
     }
 }

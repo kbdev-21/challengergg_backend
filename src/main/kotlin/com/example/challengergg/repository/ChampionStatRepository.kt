@@ -19,7 +19,7 @@ interface ChampionStatRepository: JpaRepository<ChampionStat, String> {
         WHEN LOWER(champion_display_name) LIKE LOWER(CONCAT(:key, '%')) THEN 1
         ELSE 2
         END,
-        power DESC
+        picks DESC
         """,
         nativeQuery = true
     )

@@ -66,7 +66,7 @@ class MatchServiceImpl(
             getMatchByRiotMatchDto(dto, region);
         }.toList();
         val savedMatches = matchRepository.saveAll(newMatches);
-        println("NOTE: Saved ${savedMatches.size} new matches"); // PRINT
+//        println("NOTE: Saved ${savedMatches.size} new matches"); // PRINT
 
         return existedMatches + savedMatches;
     }

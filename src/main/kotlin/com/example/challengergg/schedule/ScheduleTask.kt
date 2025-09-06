@@ -47,24 +47,34 @@ class ScheduleTask(
             RankTier.MASTER
         );
         val randomTier = eliteTiersWithRatios.random();
-        val randomRank = when (randomTier) {
+        var randomRank = when (randomTier) {
             RankTier.CHALLENGER -> (0..299).random();
             RankTier.GRANDMASTER -> (0..699).random();
             RankTier.MASTER -> (0..999).random();
             else -> -1;
         };
-        val randomRegion = Region.VN;
         val regions = Region.entries;
 
         regions.forEach { region ->
+            if(region == Region.EUN) {
+                randomRank = when (randomTier) {
+                    RankTier.CHALLENGER -> (0..199).random();
+                    RankTier.GRANDMASTER -> (0..499).random();
+                    RankTier.MASTER -> (0..999).random();
+                    else -> -1;
+                };
+            }
+
             val puuid = riotApi.getSoloDuoLeague(randomTier, region)?.entries?.get(randomRank)?.puuid
                 ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
 
-            matchService.getMatchesByPuuid(puuid, 420, 0, 10, region);
+            val matchPerFetch = 10;
+
+            matchService.getMatchesByPuuid(puuid, 420, 0, matchPerFetch, region);
 
             val end = System.currentTimeMillis();
             val elapsedSeconds = (end - start) / 1000.0;
-            println("SCHEDULE: Finished fetch $puuid (${randomTier.toString()}) matches in ${elapsedSeconds}s (${region.toString()} server)");
+            println("SCHEDULE: Finished fetch $matchPerFetch $puuid (${randomTier.toString()}) matches in ${elapsedSeconds}s (${region.toString()} server)");
         }
 
 //        val puuid = riotApi.getSoloDuoLeague(randomTier, randomRegion)?.entries?.get(randomRank)?.puuid
