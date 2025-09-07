@@ -159,7 +159,7 @@ class MatchServiceImpl(
             performance.assists = dto.assists;
             performance.kda = if(performance.deaths == 0) (performance.kills + performance.assists).toDouble() else (performance.kills + performance.assists).toDouble()/performance.deaths;
             performance.killParticipation = dto.challenges?.killParticipation?.toDouble() ?: 0.0;
-            val minutes = (match.duration/60).toInt();
+            val minutes = (match.duration/60).coerceAtLeast(1).toInt();
             performance.totalCs = dto.totalMinionsKilled + dto.neutralMinionsKilled;
             performance.csPerMin = performance.totalCs.toDouble() / minutes;
             performance.totalGold = dto.goldEarned;

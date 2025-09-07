@@ -21,15 +21,21 @@ class Algorithm {
 
         val defaultWeight = 5.0;
         val kpWeight = 50.0;
-        val maxKp = 0.8;
-        val winWeight = 10.0;
-        val dp10mWeight = 25.0;
+        val maxKp = 0.75;
+        val winWeight = 15.0;
+        val dp10mWeight = 20.0;
         val goldDiffWeight = 10.0;
         val maxGoldDiff = 4000;
 
         var defaultScore = defaultWeight;
 
-        var kpScore = (kp/maxKp) * kpWeight;
+        val balancedKp = when(position) {
+            PlayerPosition.TOP -> kp + 0.15;
+            PlayerPosition.MID -> kp + 0.1;
+            PlayerPosition.ADC -> kp + 0.05;
+            else -> kp;
+        }
+        var kpScore = (balancedKp/maxKp) * kpWeight;
         if(kpScore > kpWeight) kpScore = kpWeight;
 
         var winScore = if(win) winWeight else 0.0;

@@ -1,7 +1,7 @@
 package com.example.challengergg.enums
 
 enum class ItemType(val riotIdsList: List<Int>) {
-    START(listOf(1056, 1054, 1055, 1082, 1083)),
+    START(listOf(1056, 1054, 1055, 1082, 1083, 3865)),
     BASE(
         listOf(
             1001, 1004, 1006, 1027, 1028, 1029, 1033, 1036, 1037, 1038, 1042, 1043, 1052, 1053, 1058, 2031, 2055, 3147,
@@ -55,6 +55,9 @@ enum class ItemType(val riotIdsList: List<Int>) {
             3077,
             6690,
             2020,
+            3070,
+            2139,
+            2010
         )
     ),
     BOOT(listOf(3006, 3009, 3010, 3013, 3020, 3047, 3111, 3158)),

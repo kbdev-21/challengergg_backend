@@ -22,7 +22,6 @@ class ScheduleTask(
         println("SCHEDULE: Start update champion stats");
         val start = System.currentTimeMillis();
 
-
         analyticService.updateChampionStats();
 
         val end = System.currentTimeMillis();
@@ -49,23 +48,18 @@ class ScheduleTask(
             RankTier.MASTER
         );
         val randomTier = eliteTiersWithRatios.random();
-        var randomRank = when (randomTier) {
-            RankTier.CHALLENGER -> (0..299).random();
-            RankTier.GRANDMASTER -> (0..699).random();
-            RankTier.MASTER -> (0..999).random();
-            else -> -1;
-        };
         val regions = Region.entries;
 
         regions.forEach { region ->
-            if(region == Region.EUN) {
-                randomRank = when (randomTier) {
-                    RankTier.CHALLENGER -> (0..199).random();
-                    RankTier.GRANDMASTER -> (0..499).random();
-                    RankTier.MASTER -> (0..999).random();
-                    else -> -1;
-                };
-            }
+            val challengerBreakpoint = if(listOf(Region.EUN, Region.BR).contains(region)) 199 else 299;
+            val grandmasterBreakpoint = if(listOf(Region.EUN, Region.BR).contains(region)) 499 else 699;
+            val masterBreakpoint = 999;
+            val randomRank = when (randomTier) {
+                RankTier.CHALLENGER -> (0..challengerBreakpoint).random();
+                RankTier.GRANDMASTER -> (0..grandmasterBreakpoint).random();
+                RankTier.MASTER -> (0..masterBreakpoint).random();
+                else -> -1;
+            };
 
             val puuid = riotApi.getSoloDuoLeague(randomTier, region)?.entries?.get(randomRank)?.puuid
                 ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
