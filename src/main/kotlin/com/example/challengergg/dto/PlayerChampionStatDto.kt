@@ -1,15 +1,15 @@
 package com.example.challengergg.dto
 
-import com.example.challengergg.enums.ChampTier
-import com.example.challengergg.enums.PlayerPosition
 import com.example.challengergg.entity.analytic.ItemStat
 import com.example.challengergg.entity.analytic.MatchUpStat
 import com.example.challengergg.entity.analytic.RuneStat
 import com.example.challengergg.entity.analytic.SpellComboStat
-import com.example.challengergg.enums.Region
-import java.util.Date
+import com.example.challengergg.enums.ChampTier
+import com.example.challengergg.enums.PlayerPosition
+import java.util.*
 
-class ChampionStatDetailDto {
+class PlayerChampionStatDto {
+    var puuid: String = "";
     var code: String = "";
     var championName: String = "";
     var championDisplayName: String = "";
@@ -18,8 +18,6 @@ class ChampionStatDetailDto {
     var pickRate: Double = 0.0;
     var wins: Int = 0;
     var winRate: Double = 0.0;
-    var power: Int = 0;
-    var tier: ChampTier = ChampTier.S;
     var avgKills: Double = 0.0;
     var avgDeaths: Double = 0.0;
     var avgAssists: Double = 0.0;
@@ -35,11 +33,6 @@ class ChampionStatDetailDto {
     var avgPenta: Double = 0.0;
     var avgSolokills: Double = 0.0;
     var avgKbscore: Double = 0.0;
-    var bestSpellCombos: List<SpellComboStat> = listOf();
-    var bestRunes: List<RuneStat> = listOf();
-    var bestLegendaryItems: List<ItemStat> = listOf();
-    var bestBootItems: List<ItemStat> = listOf();
     var matchUps: List<MatchUpStat> = listOf();
     var createdAt: Date = Date();
-    var version: String = "";
 }

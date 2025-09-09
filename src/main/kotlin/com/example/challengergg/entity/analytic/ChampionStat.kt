@@ -2,15 +2,23 @@ package com.example.challengergg.entity.analytic
 
 import com.example.challengergg.enums.ChampTier
 import com.example.challengergg.enums.PlayerPosition
+import com.example.challengergg.enums.Region
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import java.util.Date
 
 @Entity
 @Table(name = "champion_stats")
 class ChampionStat {
     @Id
     var code: String = "";
+
+    var createdAt: Date = Date();
+
+    var region: Region? = null;
+
+    var version: String = "";
 
     var championName: String = "";
 

@@ -17,7 +17,7 @@ class ScheduleTask(
     private val riotApi: RiotApi,
     private val matchService: MatchService
 ) {
-    @Scheduled(cron = "0 0 */1 * * *")
+    @Scheduled(cron = "0 0 */12 * * *")
     fun updateChampionStats() {
         println("SCHEDULE: Start update champion stats");
         val start = System.currentTimeMillis();
@@ -29,9 +29,7 @@ class ScheduleTask(
         println("SCHEDULE: Finished update champion stats in ${elapsedSeconds}s");
     }
 
-
-    //@Scheduled(cron = "*/40 * * * * *")
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 */2 * * * *")
     @Transactional
     suspend fun fetchMatches() {
         val start = System.currentTimeMillis();

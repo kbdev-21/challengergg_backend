@@ -20,4 +20,16 @@ interface MatchRepository: JpaRepository<Match, UUID> {
         nativeQuery = true
     )
     fun countRankedMatches(): Int;
+
+    @Query(
+        """
+        SELECT COUNT(*)
+        FROM public.performances p
+        JOIN public.matches m ON p.match_id = m.match_id
+        WHERE m.queue IN ('SOLO', 'FLEX')
+        AND p.puuid = :puuid  
+        """,
+        nativeQuery = true
+    )
+    fun countPlayerRankedMatches(puuid: String): Int;
 }

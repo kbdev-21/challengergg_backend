@@ -32,7 +32,7 @@ class PlayerRank() {
 
     @ManyToOne
     @JoinColumn(name = "player_id", nullable = false)
-    var player: Player = Player();
+    lateinit var player: Player;
 
     var power: Int = 0;
 }

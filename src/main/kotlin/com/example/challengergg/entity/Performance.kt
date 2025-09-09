@@ -7,7 +7,12 @@ import org.hibernate.annotations.BatchSize
 import java.util.UUID
 
 @Entity
-@Table(name = "performances")
+@Table(
+    name = "performances",
+    indexes = [
+        Index(name = "idx_performance_puuid", columnList = "puuid")
+    ]
+)
 class Performance() {
     @Id
     @Column(name = "performance_id")
@@ -15,7 +20,7 @@ class Performance() {
 
     @ManyToOne
     @JoinColumn(name = "match_id", nullable = false)
-    var match: Match = Match();
+    lateinit var match: Match
 
     var puuid: String = "";
 

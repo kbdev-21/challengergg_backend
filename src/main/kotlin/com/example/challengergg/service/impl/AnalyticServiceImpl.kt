@@ -6,22 +6,27 @@ import com.example.challengergg.common.util.Algorithm
 import com.example.challengergg.common.util.AppUtil
 import com.example.challengergg.common.util.StringUtil
 import com.example.challengergg.dto.ChampionStatDetailDto
+import com.example.challengergg.dto.PlayerChampionStatDto
 import com.example.challengergg.entity.analytic.*
 import com.example.challengergg.entity.query.CountAndWinsTable
 import com.example.challengergg.exception.CustomException
+import com.example.challengergg.external.DdragonApi
 import com.example.challengergg.repository.ChampionStatRepository
 import com.example.challengergg.repository.MatchRepository
 import com.example.challengergg.repository.PerformanceRepository
+import com.example.challengergg.repository.PlayerChampionStatRepository
 import com.example.challengergg.service.AnalyticService
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.util.Date
 
 @Service
 class AnalyticServiceImpl(
     private val performanceRepository: PerformanceRepository,
     private val matchRepository: MatchRepository,
     private val championStatRepository: ChampionStatRepository,
+    private val playerChampionStatRepository: PlayerChampionStatRepository
 ): AnalyticService {
     private val algorithm = Algorithm();
     private val modelMapper = ModelMapper();
@@ -47,8 +52,14 @@ class AnalyticServiceImpl(
     }
 
     override fun updateChampionStats() {
+        val ddragonApi = DdragonApi();
+
+        val currentVersion = ddragonApi.getCurrentLeagueVersion();
+
         val totalMatches = matchRepository.countRankedMatches();
-        val allChampPosCodesCount = performanceRepository.countAllRankedChampPosCodes();
+        val allChampPosCodesCount = performanceRepository.countAllRankedChampPosCodes(currentVersion);
+
+        val updateDate = Date();
 
         val newChampionStats = mutableListOf<ChampionStat>();
         for(champPosCodeData in allChampPosCodesCount) {
@@ -66,11 +77,11 @@ class AnalyticServiceImpl(
             val power = algorithm.calculateChampPower(pickRate, winRate);
             val tier = algorithm.getChampTierByPower(power);
 
-            val allAvgStats = performanceRepository.calculateAvgStatsByChampPosCode(champPosCodeData.getValue());
+            val allAvgStats = performanceRepository.calculateAvgStatsByChampPosCode(champPosCodeData.getValue(), currentVersion);
 
             /* spells */
             val allSpellComboCodesCount = performanceRepository
-                .countAllRankedSpellComboCodesByChampPosCode(champPosCodeData.getValue());
+                .countAllRankedSpellComboCodesByChampPosCode(champPosCodeData.getValue(), currentVersion);
 
             val spellComboStats = mutableListOf<SpellComboStat>();
             allSpellComboCodesCount.take(5).forEach { count ->
@@ -86,13 +97,14 @@ class AnalyticServiceImpl(
 
             /* runes */
             val allRuneCodesCount = performanceRepository
-                .countAllRankedRuneCodesByChampPosCode(champPosCodeData.getValue());
+                .countAllRankedRuneCodesByChampPosCode(champPosCodeData.getValue(), currentVersion);
             val bestSelections = HashMap<String, List<Int>>();
             for(runeCodeCount in allRuneCodesCount) {
                 bestSelections[runeCodeCount.getValue()] = performanceRepository
                     .countAllRankedRuneSelectionsByChampPosCodeAndRuneCode(
                         champPosCodeData.getValue(),
-                        runeCodeCount.getValue()
+                        runeCodeCount.getValue(),
+                        currentVersion
                     )[0].getValue().toList();
             }
 
@@ -112,7 +124,7 @@ class AnalyticServiceImpl(
 
             /* items */
             val allItemIdsCount = performanceRepository
-                .countAllRankedItemIdsByChampPosCode(champPosCodeData.getValue());
+                .countAllRankedItemIdsByChampPosCode(champPosCodeData.getValue(), currentVersion);
 
             val legendaryItemStats = getItemStatsFromCountAndWinData(allItemIdsCount, ItemType.LEGENDARY, picks);
 
@@ -120,7 +132,7 @@ class AnalyticServiceImpl(
 
             /* matchups */
             val allMatchUpsCount = performanceRepository
-                .countAllRankedMatchUpChampionNamesByChampPosCode(champPosCodeData.getValue());
+                .countAllRankedMatchUpChampionNamesByChampPosCode(champPosCodeData.getValue(), currentVersion);
 
             val matchUpStats = mutableListOf<MatchUpStat>();
             allMatchUpsCount.forEach { count ->
@@ -151,11 +163,79 @@ class AnalyticServiceImpl(
             champStat.bestLegendaryItems = legendaryItemStats;
             champStat.bestBootItems = bootItemStats;
             champStat.matchUps = matchUpStats;
+            champStat.createdAt = updateDate;
+            champStat.version = currentVersion;
 
             newChampionStats.add(champStat);
         }
         championStatRepository.deleteAll();
         championStatRepository.saveAll(newChampionStats);
+    }
+
+    override fun getPlayerChampionStats(puuid: String): List<PlayerChampionStatDto> {
+        return playerChampionStatRepository
+            .findByPuuid(puuid)
+            .sortedByDescending { it.picks }
+            .map { stat ->
+                modelMapper.map(stat, PlayerChampionStatDto::class.java)
+            };
+    }
+
+    override fun updatePlayerChampionStats(puuid: String) {
+        val totalMatches = matchRepository.countPlayerRankedMatches(puuid);
+        val allChampPosCodesCount = performanceRepository.countAllPlayerRankedChampPosCodes(puuid);
+
+        val updateDate = Date();
+
+        val newPlayerChampionStats = mutableListOf<PlayerChampionStat>();
+        for(champPosCodeData in allChampPosCodesCount) {
+            val picks = champPosCodeData.getCount();
+            val wins = champPosCodeData.getWins();
+
+            val pickRate = picks.toDouble() / totalMatches.toDouble();
+            val winRate = wins.toDouble() / picks.toDouble();
+
+            val pickRateThreshold = 0.005;
+            if(pickRate < pickRateThreshold) {
+                continue;
+            }
+
+            val allAvgStats = performanceRepository.calculatePlayerAvgStatsByChampPosCode(champPosCodeData.getValue(), puuid);
+
+            /* matchups */
+            val allMatchUpsCount = performanceRepository
+                .countAllPlayerRankedMatchUpChampionNamesByChampPosCode(champPosCodeData.getValue(), puuid);
+
+            val matchUpStats = mutableListOf<MatchUpStat>();
+            allMatchUpsCount.forEach { count ->
+                val matchUpStat = MatchUpStat();
+                matchUpStat.opponentChampionName = count.getValue();
+                matchUpStat.opponentChampionDisplayName = stringUtil.getChampionDisplayName(count.getValue());
+                matchUpStat.picks = count.getCount();
+                matchUpStat.pickRate = count.getCount().toDouble() / picks.toDouble();
+                matchUpStat.wins = count.getWins();
+                matchUpStat.winRate = count.getWins().toDouble() / count.getCount().toDouble();
+                matchUpStats.add(matchUpStat);
+            }
+
+            /* save */
+            val playerChampStat = modelMapper.map(allAvgStats, PlayerChampionStat::class.java);
+            playerChampStat.puuid = puuid;
+            playerChampStat.code = champPosCodeData.getValue();
+            playerChampStat.championName = champPosCodeData.getValue().split("-")[0];
+            playerChampStat.championDisplayName = stringUtil.getChampionDisplayName(playerChampStat.championName);
+            playerChampStat.position = PlayerPosition.valueOf(champPosCodeData.getValue().split("-")[1]);
+            playerChampStat.picks = picks;
+            playerChampStat.pickRate = pickRate;
+            playerChampStat.wins = wins;
+            playerChampStat.winRate = winRate;
+            playerChampStat.matchUps = matchUpStats;
+            playerChampStat.createdAt = updateDate;
+
+            newPlayerChampionStats.add(playerChampStat);
+        }
+        playerChampionStatRepository.deleteByPuuid(puuid);
+        playerChampionStatRepository.saveAll(newPlayerChampionStats);
     }
 
     private fun getItemStatsFromCountAndWinData(
@@ -182,4 +262,6 @@ class AnalyticServiceImpl(
 
         return filteredItemStats;
     }
+
+
 }

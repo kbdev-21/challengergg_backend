@@ -1,7 +1,8 @@
 package com.example.challengergg.controller
 
 import com.example.challengergg.dto.ChampionStatDetailDto
-import com.example.challengergg.dto.ChampionStatSummaryDto
+import com.example.challengergg.dto.PlayerChampionStatDto
+import com.example.challengergg.external.DdragonApi
 import com.example.challengergg.service.AnalyticService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,5 +27,16 @@ class AnalyticController(
     @GetMapping("/api/v1/analytics/champstats/by-championname/{championName}")
     fun getChampStatsByChampionName(@PathVariable championName: String): List<ChampionStatDetailDto> {
         return analyticService.getChampionStatsByChampionName(championName);
+    }
+
+    @PostMapping("/api/v1/analytics/champstats/by-puuid/{puuid}/update")
+    fun updatePlayerChampStats(@PathVariable puuid: String): String {
+        analyticService.updatePlayerChampionStats(puuid);
+        return "Updated successfully";
+    }
+
+    @GetMapping("/api/v1/analytics/champstats/by-puuid/{puuid}")
+    fun getPlayerChampStats(@PathVariable puuid: String): List<PlayerChampionStatDto> {
+        return analyticService.getPlayerChampionStats(puuid);
     }
 }
