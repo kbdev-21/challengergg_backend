@@ -1,5 +1,6 @@
 package com.example.challengergg.schedule
 
+import com.example.challengergg.common.util.AppUtil
 import com.example.challengergg.enums.RankTier
 import com.example.challengergg.enums.Region
 import com.example.challengergg.exception.CustomException
@@ -17,16 +18,18 @@ class ScheduleTask(
     private val riotApi: RiotApi,
     private val matchService: MatchService
 ) {
-    @Scheduled(cron = "0 0 */12 * * *")
+    private val appUtil = AppUtil();
+
+    @Scheduled(cron = "0 0 */1 * * *")
     fun updateChampionStats() {
-        println("SCHEDULE: Start update champion stats");
+        appUtil.printLnWithTagAndDate("schedule", "Start update champion stats...");
         val start = System.currentTimeMillis();
 
         analyticService.updateChampionStats();
 
         val end = System.currentTimeMillis();
         val elapsedSeconds = (end - start) / 1000.0;
-        println("SCHEDULE: Finished update champion stats in ${elapsedSeconds}s");
+        appUtil.printLnWithTagAndDate("schedule", "Finished update champion stats in ${elapsedSeconds}s");
     }
 
     @Scheduled(cron = "0 */2 * * * *")
@@ -68,7 +71,10 @@ class ScheduleTask(
 
             val end = System.currentTimeMillis();
             val elapsedSeconds = (end - start) / 1000.0;
-            println("SCHEDULE: Finished fetch $matchPerFetch $puuid (${randomTier.toString()}) matches in ${elapsedSeconds}s (${region.toString()} server)");
+            appUtil.printLnWithTagAndDate(
+                "schedule",
+                "Finished fetch $matchPerFetch ${region.toString()} ${randomTier.toString()} matches in ${elapsedSeconds}s ($puuid)"
+            );
         }
     }
 }

@@ -1,6 +1,8 @@
 package com.example.challengergg.common.util
 
 import com.example.challengergg.enums.ItemType
+import java.text.SimpleDateFormat
+import java.util.*
 
 class AppUtil {
     fun getItemType(itemId: Int): ItemType {
@@ -12,5 +14,12 @@ class AppUtil {
             in ItemType.UTILITY.riotIdsList -> ItemType.UTILITY;
             else -> ItemType.LEGENDARY;
         }
+    }
+
+    fun printLnWithTagAndDate(tag: String, content: String) {
+        val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+        val currentDate = formatter.format(Date())
+
+        println("[$currentDate] ${tag.uppercase()}: $content");
     }
 }

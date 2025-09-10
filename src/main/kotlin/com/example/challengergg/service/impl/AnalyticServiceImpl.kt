@@ -51,10 +51,12 @@ class AnalyticServiceImpl(
             }
     }
 
+    /* TODO: switch back to current version in DdragonApi (note that the version in the ddragon sometimes faster than reality */
     override fun updateChampionStats() {
-        val ddragonApi = DdragonApi();
-
-        val currentVersion = ddragonApi.getCurrentLeagueVersion();
+//        val ddragonApi = DdragonApi();
+//
+//        val currentVersion = ddragonApi.getCurrentLeagueVersion();
+        val currentVersion = "15.17";
 
         val totalMatches = matchRepository.countRankedMatches();
         val allChampPosCodesCount = performanceRepository.countAllRankedChampPosCodes(currentVersion);
@@ -175,7 +177,11 @@ class AnalyticServiceImpl(
     override fun getPlayerChampionStats(puuid: String): List<PlayerChampionStatDto> {
         return playerChampionStatRepository
             .findByPuuid(puuid)
-            .sortedByDescending { it.picks }
+            .sortedWith(
+                compareByDescending<PlayerChampionStat> { it.picks }
+                    .thenByDescending { it.wins }
+                    .thenByDescending { it.avgKbscore }
+            )
             .map { stat ->
                 modelMapper.map(stat, PlayerChampionStatDto::class.java)
             };
