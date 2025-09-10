@@ -20,6 +20,9 @@ class AppUtil {
         val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
         val currentDate = formatter.format(Date())
 
-        println("[$currentDate] ${tag.uppercase()}: $content");
+        val blue = "\u001B[34m"      // ANSI code draw blue
+        val reset = "\u001B[0m"      // ANSI code reset color
+
+        println("[$currentDate] ${blue}${tag.uppercase()}$reset $content")
     }
 }

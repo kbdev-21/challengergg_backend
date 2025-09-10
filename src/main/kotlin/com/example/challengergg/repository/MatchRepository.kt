@@ -15,11 +15,12 @@ interface MatchRepository: JpaRepository<Match, UUID> {
         """
         SELECT COUNT(*)
         FROM public.matches m
-        WHERE m.queue IN ('SOLO', 'FLEX')    
+        WHERE m.queue IN ('SOLO', 'FLEX')
+        AND m.version = :version
         """,
         nativeQuery = true
     )
-    fun countRankedMatches(): Int;
+    fun countRankedMatches(version: String): Int;
 
     @Query(
         """

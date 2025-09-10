@@ -19,6 +19,7 @@ import com.example.challengergg.service.AnalyticService
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 
 @Service
@@ -31,6 +32,7 @@ class AnalyticServiceImpl(
     private val algorithm = Algorithm();
     private val modelMapper = ModelMapper();
     private val stringUtil = StringUtil();
+    private val appUtil = AppUtil();
 
     override fun getAllChampionStats(): List<ChampionStatDetailDto> {
         return championStatRepository
@@ -51,14 +53,20 @@ class AnalyticServiceImpl(
             }
     }
 
-    /* TODO: switch back to current version in DdragonApi (note that the version in the ddragon sometimes faster than reality */
+    @Transactional
     override fun updateChampionStats() {
-//        val ddragonApi = DdragonApi();
-//
-//        val currentVersion = ddragonApi.getCurrentLeagueVersion();
-        val currentVersion = "15.17";
+        appUtil.printLnWithTagAndDate("update_stats", "Start updating champion stats...");
+        val ddragonApi = DdragonApi();
 
-        val totalMatches = matchRepository.countRankedMatches();
+        val currentVersion = ddragonApi.getCurrentLeagueVersion();
+
+        val minimumMatches = 2000;
+        val totalMatches = matchRepository.countRankedMatches(currentVersion);
+        if(totalMatches < minimumMatches) {
+            appUtil.printLnWithTagAndDate("update_stats", "Update cancelled: Too few matches for $currentVersion version.");
+            throw CustomException(HttpStatus.UNPROCESSABLE_ENTITY, "Update cancelled: Too few matches for $currentVersion version.");
+        };
+
         val allChampPosCodesCount = performanceRepository.countAllRankedChampPosCodes(currentVersion);
 
         val updateDate = Date();
@@ -172,6 +180,7 @@ class AnalyticServiceImpl(
         }
         championStatRepository.deleteAll();
         championStatRepository.saveAll(newChampionStats);
+        appUtil.printLnWithTagAndDate("update_stats", "Finish update champion stats");
     }
 
     override fun getPlayerChampionStats(puuid: String): List<PlayerChampionStatDto> {
@@ -249,8 +258,6 @@ class AnalyticServiceImpl(
         itemType: ItemType,
         picks: Int
     ): List<ItemStat> {
-        val appUtil = AppUtil();
-
         val filteredItemStats = mutableListOf<ItemStat>();
 
         itemIdsCount

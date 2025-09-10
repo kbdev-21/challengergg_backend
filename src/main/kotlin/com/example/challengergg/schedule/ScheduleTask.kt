@@ -22,21 +22,13 @@ class ScheduleTask(
 
     @Scheduled(cron = "0 0 */1 * * *")
     fun updateChampionStats() {
-        appUtil.printLnWithTagAndDate("schedule", "Start update champion stats...");
-        val start = System.currentTimeMillis();
-
+        appUtil.printLnWithTagAndDate("schedule", "Start updating champion stats...");
         analyticService.updateChampionStats();
-
-        val end = System.currentTimeMillis();
-        val elapsedSeconds = (end - start) / 1000.0;
-        appUtil.printLnWithTagAndDate("schedule", "Finished update champion stats in ${elapsedSeconds}s");
     }
 
     @Scheduled(cron = "0 */2 * * * *")
     @Transactional
     suspend fun fetchMatches() {
-        val start = System.currentTimeMillis();
-
         val eliteTiersWithRatios = listOf(
             RankTier.CHALLENGER,
             RankTier.CHALLENGER,
@@ -67,14 +59,12 @@ class ScheduleTask(
 
             val matchPerFetch = 10;
 
-            matchService.getMatchesByPuuid(puuid, 420, 0, matchPerFetch, region);
-
-            val end = System.currentTimeMillis();
-            val elapsedSeconds = (end - start) / 1000.0;
             appUtil.printLnWithTagAndDate(
                 "schedule",
-                "Finished fetch $matchPerFetch ${region.toString()} ${randomTier.toString()} matches in ${elapsedSeconds}s ($puuid)"
+                "Start fetching $matchPerFetch ${region.toString()} ${randomTier.toString()} matches ($puuid)..."
             );
+
+            matchService.getMatchesByPuuid(puuid, 420, 0, matchPerFetch, region);
         }
     }
 }
