@@ -16,9 +16,9 @@ class PlayerController(
     fun getPlayerByGameNameAndTagLine(
         @PathVariable gameName: String,
         @PathVariable tagLine: String,
-        @PathVariable region: String): PlayerDto {
+        @PathVariable region: String
+    ): PlayerDto {
         val regionEnum = Region.valueOf(region.uppercase());
-
         return playerService.getPlayerByGameNameAndTagLine(gameName, tagLine, regionEnum);
     }
 }

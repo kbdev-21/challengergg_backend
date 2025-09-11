@@ -1,6 +1,7 @@
 package com.example.challengergg.schedule
 
 import com.example.challengergg.common.util.AppUtil
+import com.example.challengergg.dto.MessageDto
 import com.example.challengergg.enums.RankTier
 import com.example.challengergg.enums.Region
 import com.example.challengergg.exception.CustomException
@@ -9,6 +10,7 @@ import com.example.challengergg.service.AnalyticService
 import com.example.challengergg.service.MatchService
 import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
+import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
@@ -22,13 +24,19 @@ class ScheduleTask(
 
     @Scheduled(cron = "0 0 */1 * * *")
     fun updateChampionStats() {
-        appUtil.printLnWithTagAndDate("schedule", "Start updating champion stats...");
+        appUtil.printLnWithTagAndDate("schedule_update_champ_stats", "Start updating champion stats...");
+
         analyticService.updateChampionStats();
     }
 
     @Scheduled(cron = "0 */2 * * * *")
     @Transactional
     suspend fun fetchMatches() {
+        appUtil.printLnWithTagAndDate(
+            "schedule_fetch_matches",
+            "Start matches fetching..."
+        );
+
         val eliteTiersWithRatios = listOf(
             RankTier.CHALLENGER,
             RankTier.CHALLENGER,
@@ -42,6 +50,7 @@ class ScheduleTask(
         );
         val randomTier = eliteTiersWithRatios.random();
         val regions = Region.entries;
+
 
         regions.forEach { region ->
             val challengerBreakpoint = if(listOf(Region.EUN, Region.BR).contains(region)) 199 else 299;
@@ -58,13 +67,9 @@ class ScheduleTask(
                 ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
 
             val matchPerFetch = 10;
-
-            appUtil.printLnWithTagAndDate(
-                "schedule",
-                "Start fetching $matchPerFetch ${region.toString()} ${randomTier.toString()} matches ($puuid)..."
-            );
-
             matchService.getMatchesByPuuid(puuid, 420, 0, matchPerFetch, region);
         }
+
+
     }
 }
