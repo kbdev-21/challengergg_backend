@@ -17,12 +17,12 @@ class AppUtil {
     }
 
     fun printLnWithTagAndDate(tag: String, content: String) {
-        val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
-        val currentDate = formatter.format(Date())
+        val formatter = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.forLanguageTag("vi-VN"));
+        val currentDate = formatter.format(Date());
 
-        val blue = "\u001B[34m"      // ANSI code draw blue
-        val reset = "\u001B[0m"      // ANSI code reset color
+        val blue = "\u001B[34m";      // ANSI code draw blue
+        val reset = "\u001B[0m";      // ANSI code reset color
 
-        println("[$currentDate] ${blue}${tag.uppercase()}$reset $content")
+        println("[$currentDate] ${blue}${tag.uppercase()}$reset $content");
     }
 }

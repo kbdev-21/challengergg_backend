@@ -55,6 +55,12 @@ class MatchServiceImpl(
         return getMatchesByPuuid(puuid, queue, start, count, region);
     }
 
+    @Transactional
+    override fun deleteMatchByVersionIsNot(version: String) {
+        val matchesToDelete = matchRepository.findByVersionIsNot(version);
+        matchRepository.deleteAll(matchesToDelete);
+    }
+
     private suspend fun getMatchesAndSaveNewOnesByPuuid(puuid: String, queue: Int?, start: Int, count: Int, region: Region): List<Match> {
         val matchIds = riotApi.getMatchIdsByPuuid(puuid, queue, start, count, region)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Puuid not found");
@@ -86,9 +92,10 @@ class MatchServiceImpl(
         val existedMatchIds = existedMatches.map { it.matchId };
         val newMatchIds = matchIds.filterNot { it in existedMatchIds };
         if(newMatchIds.isEmpty()) return emptyList();
+        val concurrencyLimit = 4;
         val newMatchDtos = coroutineScope {
             newMatchIds
-                .chunked(5)
+                .chunked(concurrencyLimit)
                 .flatMap { chunk ->
                     chunk.map { matchId ->
                         async {

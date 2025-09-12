@@ -2,13 +2,21 @@ package com.example.challengergg.repository
 
 import com.example.challengergg.entity.Match
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
+import org.springframework.transaction.annotation.Transactional
 import java.util.UUID
 
 interface MatchRepository: JpaRepository<Match, UUID> {
     fun findByMatchId(matchId: String): Match?;
 
     fun findByMatchIdIn(matchIds: List<String>): List<Match>;
+
+    fun findByVersionIsNot(version: String): List<Match>;
+
+    @Modifying
+    @Transactional
+    fun deleteByVersionIsNot(version: String);
 
     /* custom queries */
     @Query(

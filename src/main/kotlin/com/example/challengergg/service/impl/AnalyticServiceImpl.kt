@@ -16,6 +16,7 @@ import com.example.challengergg.repository.MatchRepository
 import com.example.challengergg.repository.PerformanceRepository
 import com.example.challengergg.repository.PlayerChampionStatRepository
 import com.example.challengergg.service.AnalyticService
+import com.example.challengergg.service.MatchService
 import org.modelmapper.ModelMapper
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -27,7 +28,8 @@ class AnalyticServiceImpl(
     private val performanceRepository: PerformanceRepository,
     private val matchRepository: MatchRepository,
     private val championStatRepository: ChampionStatRepository,
-    private val playerChampionStatRepository: PlayerChampionStatRepository
+    private val playerChampionStatRepository: PlayerChampionStatRepository,
+    private val matchService: MatchService
 ): AnalyticService {
     private val algorithm = Algorithm();
     private val modelMapper = ModelMapper();
@@ -59,6 +61,9 @@ class AnalyticServiceImpl(
         val ddragonApi = DdragonApi();
 
         val currentVersion = ddragonApi.getCurrentLeagueVersion();
+
+        /* TODO: Delete old matches to save storage, maybe change later */
+        matchService.deleteMatchByVersionIsNot(currentVersion);
 
         val minimumMatches = 2000;
         val totalMatches = matchRepository.countRankedMatches(currentVersion);

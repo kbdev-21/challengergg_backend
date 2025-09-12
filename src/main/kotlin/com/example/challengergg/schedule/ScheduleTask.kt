@@ -31,19 +31,24 @@ class ScheduleTask(
         chatService.deleteOldMessages();
     }
 
-    @Scheduled(cron = "0 0 */2 * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     fun updateChampionStats() {
+        val start = System.currentTimeMillis();
+
         appUtil.printLnWithTagAndDate("schedule_update_champ_stats", "Start updating champion stats...");
         analyticService.updateChampionStats();
+
+        val end = System.currentTimeMillis();
+        val elapsed = (end - start)/1000;
+        appUtil.printLnWithTagAndDate(
+            "schedule_update_champ_stats",
+            "Finish update champion stats in ${elapsed}s"
+        );
     }
 
     @Scheduled(cron = "0 */2 * * * *")
-    @Transactional
     suspend fun fetchMatches() {
-        appUtil.printLnWithTagAndDate(
-            "schedule_fetch_matches",
-            "Start matches fetching..."
-        );
+        val start = System.currentTimeMillis();
 
         val eliteTiersWithRatios = listOf(
             RankTier.CHALLENGER,
@@ -76,6 +81,13 @@ class ScheduleTask(
 
             val matchPerFetch = 10;
             matchService.getMatchesByPuuid(puuid, 420, 0, matchPerFetch, region);
+
+            val end = System.currentTimeMillis();
+            val elapsed = (end - start)/1000;
+            appUtil.printLnWithTagAndDate(
+                "schedule_fetch_matches",
+                "Fetched $region $randomTier matches in ${elapsed}s"
+            );
         }
     }
 }
