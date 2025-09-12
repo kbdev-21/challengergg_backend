@@ -6,4 +6,6 @@ interface ChatService {
     fun processAndPublishMessage(messageDto: MessageDto);
 
     fun getMessagesByRoom(room: Region): List<MessageDto>;
+
+    fun deleteOldMessages();
 }

@@ -7,6 +7,7 @@ import com.example.challengergg.enums.Region
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.external.RiotApi
 import com.example.challengergg.service.AnalyticService
+import com.example.challengergg.service.ChatService
 import com.example.challengergg.service.MatchService
 import jakarta.transaction.Transactional
 import org.springframework.http.HttpStatus
@@ -18,14 +19,21 @@ import org.springframework.stereotype.Component
 class ScheduleTask(
     private val analyticService: AnalyticService,
     private val riotApi: RiotApi,
-    private val matchService: MatchService
+    private val matchService: MatchService,
+    private val chatService: ChatService
 ) {
     private val appUtil = AppUtil();
 
-    @Scheduled(cron = "0 0 */1 * * *")
+    @Scheduled(cron = "0 0 0 */1 * *")
+    @Transactional
+    fun cleanOldMessages() {
+        appUtil.printLnWithTagAndDate("schedule_clean_old_messages", "Cleaning old messages...");
+        chatService.deleteOldMessages();
+    }
+
+    @Scheduled(cron = "0 0 */2 * * *")
     fun updateChampionStats() {
         appUtil.printLnWithTagAndDate("schedule_update_champ_stats", "Start updating champion stats...");
-
         analyticService.updateChampionStats();
     }
 
@@ -69,7 +77,5 @@ class ScheduleTask(
             val matchPerFetch = 10;
             matchService.getMatchesByPuuid(puuid, 420, 0, matchPerFetch, region);
         }
-
-
     }
 }

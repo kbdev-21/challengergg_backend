@@ -196,6 +196,7 @@ class AnalyticServiceImpl(
             };
     }
 
+    @Transactional
     override fun updatePlayerChampionStats(puuid: String) {
         val totalMatches = matchRepository.countPlayerRankedMatches(puuid);
         val allChampPosCodesCount = performanceRepository.countAllPlayerRankedChampPosCodes(puuid);

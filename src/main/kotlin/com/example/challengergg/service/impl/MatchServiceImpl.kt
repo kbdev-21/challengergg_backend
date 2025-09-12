@@ -62,7 +62,7 @@ class MatchServiceImpl(
 
         if(existedMatches.size == matchIds.size) return existedMatches;
 
-        val newRiotMatchDtos = getRiotMatchDtosByMatchIdsUnlessItExisted(matchIds, existedMatches, region);
+        val newRiotMatchDtos = getRiotMatchDtosByNonExistedMatchIdsInDb(matchIds, existedMatches, region);
 
         val newMatches = newRiotMatchDtos.map { dto ->
             getMatchByRiotMatchDto(dto, region);
@@ -78,7 +78,7 @@ class MatchServiceImpl(
         return existedMatches;
     }
 
-    private suspend fun getRiotMatchDtosByMatchIdsUnlessItExisted(
+    private suspend fun getRiotMatchDtosByNonExistedMatchIdsInDb(
         matchIds: List<String>,
         existedMatches: List<Match>,
         region: Region

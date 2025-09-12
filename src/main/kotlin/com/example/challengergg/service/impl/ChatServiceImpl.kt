@@ -8,6 +8,7 @@ import com.example.challengergg.service.ChatService
 import org.modelmapper.ModelMapper
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.util.Date
 
 @Service
@@ -30,15 +31,14 @@ class ChatServiceImpl(
 
     override fun getMessagesByRoom(room: Region): List<MessageDto> {
         val modelMapper = ModelMapper();
-
-        val messages = messageRepository.findByRoom(room);
-        val twentyFourHoursAgo = Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
-
-        return messages
-            .filter { m ->  m.sentAt.after(twentyFourHoursAgo) }
-            .map {
-                m -> modelMapper.map(m, MessageDto::class.java)
-            }
+        val twoHoursAgo = Date(System.currentTimeMillis() - 2 * 60 * 60 * 1000);
+        val messages = messageRepository.findRecentMessagesByRoom(twoHoursAgo, room.name);
+        return messages.map { m -> modelMapper.map(m, MessageDto::class.java) }
     }
 
+    @Transactional
+    override fun deleteOldMessages() {
+        val weekAgo = Date(System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000);
+        messageRepository.deleteMessagesOlderThan(weekAgo);
+    }
 }
