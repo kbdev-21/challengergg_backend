@@ -62,8 +62,8 @@ class AnalyticServiceImpl(
 
         val currentVersion = ddragonApi.getCurrentLeagueVersion();
 
-        /* TODO: Delete old matches to save storage, maybe change later */
-        matchService.deleteMatchByVersionIsNot(currentVersion);
+//        /* TODO: Delete old matches to save storage, maybe change later */
+//        matchService.deleteMatchByVersionIsNot(currentVersion);
 
         val minimumMatches = 2000;
         val totalMatches = matchRepository.countRankedMatches(currentVersion);
