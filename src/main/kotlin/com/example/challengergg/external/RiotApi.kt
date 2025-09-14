@@ -4,19 +4,40 @@ import com.example.challengergg.enums.RankTier
 import com.example.challengergg.enums.Region
 import com.example.challengergg.exception.CustomException
 import com.example.challengergg.external.dto.*
+import io.netty.channel.ChannelOption
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
+import org.springframework.http.client.reactive.ReactorClientHttpConnector
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import reactor.netty.http.client.HttpClient
+import reactor.netty.resources.ConnectionProvider
+import java.time.Duration
 
 @Component
 class RiotApi(
     @Value("\${riot.api.key}") private val apiKey: String,
 ) {
-    val webClient = WebClient.builder()
+    private final val connectionProvider = ConnectionProvider.builder("riot-api-pool")
+        .maxConnections(100)          // số kết nối tối đa
+        .maxIdleTime(Duration.ofSeconds(30))  // kết nối idle tối đa
+        .maxLifeTime(Duration.ofMinutes(5))   // thời gian sống tối đa
+        .pendingAcquireTimeout(Duration.ofSeconds(5)) // chờ khi pool full
+        .build()
+
+    private final val httpClient = HttpClient.create(connectionProvider)
+        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+        .responseTimeout(Duration.ofSeconds(20))
+
+    private final val webClient = WebClient.builder()
+        .clientConnector(
+            ReactorClientHttpConnector(
+                httpClient
+            )
+        )
         .codecs { config ->
             config.defaultCodecs().maxInMemorySize(5 * 1024 * 1024)
         }
