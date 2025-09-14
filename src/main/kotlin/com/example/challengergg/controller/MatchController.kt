@@ -20,7 +20,7 @@ class MatchController(
         @PathVariable region: String
     ): List<MatchDto> {
         val regionEnum = Region.valueOf(region.uppercase());
-        return matchService.getMatchesByPuuid(puuid, null,start ?: 0, count ?: 20, regionEnum);
+        return matchService.getMatchesByPuuid(puuid, null,start ?: 0, count ?: 20, regionEnum, true);
     }
 
     @GetMapping("/api/v1/matches/{region}/by-riotid/{gameName}/{tagLine}")
@@ -32,7 +32,7 @@ class MatchController(
         @PathVariable region: String
     ): List<MatchDto> {
         val regionEnum = Region.valueOf(region.uppercase());
-        return matchService.getMatchesByGameNameAndTagLine(gameName, tagLine, null,start ?: 0, count ?: 20, regionEnum);
+        return matchService.getMatchesByGameNameAndTagLine(gameName, tagLine, null,start ?: 0, count ?: 20, regionEnum, true);
     }
 
 }

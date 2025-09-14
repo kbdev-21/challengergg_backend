@@ -9,6 +9,7 @@ import com.example.challengergg.entity.Match
 import com.example.challengergg.entity.Performance
 import com.example.challengergg.enums.*
 import com.example.challengergg.exception.CustomException
+import com.example.challengergg.external.DdragonApi
 import com.example.challengergg.external.RiotApi
 import com.example.challengergg.external.dto.ParticipantDto
 import com.example.challengergg.external.dto.RiotMatchDto
@@ -33,8 +34,8 @@ class MatchServiceImpl(
     private val appUtil = AppUtil();
     private val matchMapper = MatchMapper();
 
-    override suspend fun getMatchesByPuuid(puuid: String, queue: Int?, start: Int, count: Int, region: Region): List<MatchDto> {
-        val playerMatches = getMatchesAndSaveNewOnesByPuuid(puuid, queue, start, count, region);
+    override suspend fun getMatchesByPuuid(puuid: String, queue: Int?, start: Int, count: Int, region: Region, saveOldMatches: Boolean): List<MatchDto> {
+        val playerMatches = getMatchesAndSaveNewOnesByPuuid(puuid, queue, start, count, region, saveOldMatches);
 
         return playerMatches
             .sortedByDescending { it.startTimeStamp }
@@ -47,12 +48,13 @@ class MatchServiceImpl(
         queue: Int?,
         start: Int,
         count: Int,
-        region: Region
+        region: Region,
+        saveOldMatches: Boolean
     ): List<MatchDto> {
         val puuid = riotApi.getAccountByNameAndTag(gameName, tagLine, region)?.puuid
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Account not found");
 
-        return getMatchesByPuuid(puuid, queue, start, count, region);
+        return getMatchesByPuuid(puuid, queue, start, count, region, saveOldMatches);
     }
 
     @Transactional
@@ -61,14 +63,14 @@ class MatchServiceImpl(
         matchRepository.deleteAll(matchesToDelete);
     }
 
-    private suspend fun getMatchesAndSaveNewOnesByPuuid(puuid: String, queue: Int?, start: Int, count: Int, region: Region): List<Match> {
+    private suspend fun getMatchesAndSaveNewOnesByPuuid(puuid: String, queue: Int?, start: Int, count: Int, region: Region, saveOldMatches: Boolean): List<Match> {
         val matchIds = riotApi.getMatchIdsByPuuid(puuid, queue, start, count, region)
             ?: throw CustomException(HttpStatus.NOT_FOUND, "Puuid not found");
         val existedMatches = getExistedMatchesByMatchIds(matchIds);
 
         if(existedMatches.size == matchIds.size) return existedMatches;
 
-        val newRiotMatchDtos = getRiotMatchDtosByNonExistedMatchIdsInDb(matchIds, existedMatches, region);
+        val newRiotMatchDtos = getRiotMatchDtosByNonExistedMatchIdsInDb(matchIds, existedMatches, region, saveOldMatches);
 
         val newMatches = newRiotMatchDtos.map { dto ->
             getMatchByRiotMatchDto(dto, region);
@@ -87,12 +89,13 @@ class MatchServiceImpl(
     private suspend fun getRiotMatchDtosByNonExistedMatchIdsInDb(
         matchIds: List<String>,
         existedMatches: List<Match>,
-        region: Region
+        region: Region,
+        saveOldMatches: Boolean
     ): List<RiotMatchDto> {
         val existedMatchIds = existedMatches.map { it.matchId };
         val newMatchIds = matchIds.filterNot { it in existedMatchIds };
         if(newMatchIds.isEmpty()) return emptyList();
-        val concurrencyLimit = 4;
+        val concurrencyLimit = 5;
         val newMatchDtos = coroutineScope {
             newMatchIds
                 .chunked(concurrencyLimit)
@@ -104,8 +107,16 @@ class MatchServiceImpl(
                         }
                     }.awaitAll();
                 }
-
         }
+
+        val ddragonApi = DdragonApi();
+        if(!saveOldMatches) {
+            val currentVersion = ddragonApi.getCurrentLeagueVersionAsync();
+            return newMatchDtos.filter { m ->
+                m.info.gameVersion.split(".").take(2).joinToString(".") == currentVersion
+            }
+        }
+
         return newMatchDtos;
     }
 

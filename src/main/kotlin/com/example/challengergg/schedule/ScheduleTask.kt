@@ -80,7 +80,7 @@ class ScheduleTask(
                 ?: throw CustomException(HttpStatus.NOT_FOUND, "Cannot found puuid");
 
             val matchPerFetch = 10;
-            matchService.getMatchesByPuuid(puuid, 420, 0, matchPerFetch, region);
+            matchService.getMatchesByPuuid(puuid, 420, 0, matchPerFetch, region, false);
 
             val end = System.currentTimeMillis();
             val elapsed = (end - start)/1000;
