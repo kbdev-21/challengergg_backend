@@ -31,7 +31,7 @@ class ScheduleTask(
         chatService.deleteOldMessages();
     }
 
-    @Scheduled(cron = "0 0 */3 * * *")
+    @Scheduled(cron = "0 0 */12 * * *")
     fun updateChampionStats() {
         val start = System.currentTimeMillis();
 
