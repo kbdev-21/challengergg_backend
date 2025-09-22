@@ -62,14 +62,11 @@ class AnalyticServiceImpl(
 
         val currentVersion = ddragonApi.getCurrentLeagueVersion();
 
-//        /* TODO: Delete old matches to save storage, maybe change later */
-//        matchService.deleteMatchByVersionIsNot(currentVersion);
-
-        val minimumMatches = 2000;
+        val minimumMatches = 5000;
         val totalMatches = matchRepository.countRankedMatches(currentVersion);
         if(totalMatches < minimumMatches) {
             appUtil.printLnWithTagAndDate("update_stats", "Update cancelled: Too few matches for $currentVersion version.");
-            throw CustomException(HttpStatus.UNPROCESSABLE_ENTITY, "Update cancelled: Too few matches for $currentVersion version.");
+            throw CustomException(HttpStatus.CONFLICT, "Update cancelled: Too few matches for $currentVersion version.");
         };
 
         val allChampPosCodesCount = performanceRepository.countAllRankedChampPosCodes(currentVersion);

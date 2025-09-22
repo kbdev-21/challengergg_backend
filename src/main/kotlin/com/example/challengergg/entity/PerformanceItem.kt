@@ -5,7 +5,12 @@ import jakarta.persistence.*
 import java.util.UUID
 
 @Entity
-@Table(name = "performance_items")
+@Table(
+    name = "performance_items",
+    indexes = [
+        Index(name = "idx_performance_id", columnList = "performance_id"),
+    ]
+)
 class PerformanceItem {
     @Id
     @Column(name = "performance_item_id")

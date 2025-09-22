@@ -64,7 +64,6 @@ class ScheduleTask(
         val randomTier = eliteTiersWithRatios.random();
         val regions = Region.entries;
 
-
         regions.forEach { region ->
             val challengerBreakpoint = if(listOf(Region.EUN, Region.BR).contains(region)) 199 else 299;
             val grandmasterBreakpoint = if(listOf(Region.EUN, Region.BR).contains(region)) 499 else 699;

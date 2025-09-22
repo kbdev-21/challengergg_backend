@@ -10,7 +10,9 @@ import java.util.UUID
 @Table(
     name = "performances",
     indexes = [
-        Index(name = "idx_performance_puuid", columnList = "puuid")
+        Index(name = "idx_performance_puuid", columnList = "puuid"),
+        Index(name = "idx_performance_match_id", columnList = "match_id"),
+        Index(name = "idx_performance_rune_id", columnList = "rune_id")
     ]
 )
 class Performance() {

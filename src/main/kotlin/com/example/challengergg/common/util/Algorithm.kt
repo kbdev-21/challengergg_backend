@@ -8,31 +8,34 @@ import com.example.challengergg.enums.RankTier
 
 class Algorithm {
     fun calculateKbScore(performance: Performance, otherPerformances: List<Performance>, gameDuration: Long): Int {
+        val gameDurationInMinutes = gameDuration.toDouble() / 60;
+
         val laneOpponentPerformance = findLaneOpponent(performance, otherPerformances);
         val kp = performance.killParticipation.toDouble();
         val deaths = performance.deaths.toDouble();
         val win = performance.win;
         val gold = performance.totalGold.toDouble();
         val opponentGold = laneOpponentPerformance?.totalGold?.toDouble() ?: (gold/2);
-        val goldDiff = gold - opponentGold;
+        val gpm = gold / gameDurationInMinutes;
+        val opponentGpm = opponentGold / gameDurationInMinutes;
+        val gpmDiff = gpm - opponentGpm; // gold per min
         val position = performance.position;
-        val gameDurationInMinutes = gameDuration.toDouble() / 60;
-        val dp10m = (deaths/gameDurationInMinutes) * 10; //deaths per 10 minutes
+        val dp10m = (deaths/gameDurationInMinutes) * 10; // deaths per 10 minutes
 
         val defaultWeight = 5.0;
         val kpWeight = 50.0;
         val maxKp = 0.75;
         val winWeight = 15.0;
         val dp10mWeight = 20.0;
-        val goldDiffWeight = 10.0;
-        val maxGoldDiff = 4000;
+        val gpmDiffWeight = 10.0;
+        val maxGpmDiff = 135.0;
 
         var defaultScore = defaultWeight;
 
         val balancedKp = when(position) {
-            PlayerPosition.TOP -> kp + 0.15;
-            PlayerPosition.MID -> kp + 0.1;
-            PlayerPosition.ADC -> kp + 0.05;
+            PlayerPosition.TOP -> kp + 0.125;
+            PlayerPosition.MID -> kp + 0.075;
+            PlayerPosition.ADC -> kp + 0.075;
             else -> kp;
         }
         var kpScore = (balancedKp/maxKp) * kpWeight;
@@ -44,12 +47,12 @@ class Algorithm {
         if(dp10mScore > dp10mWeight) dp10mScore = dp10mWeight;
         if(dp10mScore < -dp10mWeight/2) dp10mScore = -dp10mWeight/2;
 
-        var goldDiffScore = goldDiffWeight/2 + ((goldDiff/maxGoldDiff) * goldDiffWeight)/2;
-        if(goldDiffScore > goldDiffWeight) goldDiffScore = goldDiffWeight;
-        if(goldDiffScore < 0) goldDiffScore = 0.0;
-        if(position == PlayerPosition.SPT) goldDiffScore = goldDiffWeight/2;
+        var gpmDiffScore = gpmDiffWeight/2 + ((gpmDiff / maxGpmDiff) * gpmDiffWeight) / 2;
+        if (gpmDiffScore > gpmDiffWeight) gpmDiffScore = gpmDiffWeight;
+        if (gpmDiffScore < 0) gpmDiffScore = 0.0;
+        if (position == PlayerPosition.SPT) gpmDiffScore = gpmDiffWeight / 2;
 
-        val kbScore = defaultScore + kpScore + winScore + dp10mScore + goldDiffScore;
+        val kbScore = defaultScore + kpScore + winScore + dp10mScore + gpmDiffScore;
 
         return kbScore.toInt();
     }
