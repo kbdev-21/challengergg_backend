@@ -62,7 +62,7 @@ class AnalyticServiceImpl(
 
         val currentVersion = ddragonApi.getCurrentLeagueVersion();
 
-        val minimumMatches = 5000;
+        val minimumMatches = 10000;
         val totalMatches = matchRepository.countRankedMatches(currentVersion);
         if(totalMatches < minimumMatches) {
             appUtil.printLnWithTagAndDate("update_stats", "Update cancelled: Too few matches for $currentVersion version.");
